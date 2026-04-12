@@ -1,0 +1,217 @@
+# ============================================================================
+# VirtualMiner / VHW
+# ASCII-ONLY SOURCE FILE
+# File: monitor.py
+#
+# Purpose
+# -------
+#   Rule-aligned monitor with EMA stabilizers and damped alerts.
+#   Consumes a read() telemetry function and produces compact frames
+#   that other modules (LiveDriver, Telemetry Console, Allocators) can use.
+#
+# v4.8.1 Alignment Changes
+# ------------------------
+# - Exports EMA-smoothed values using canonical field names:
+#     global_util, gpu_util, gpu_mem_util, mem_bw_util, cpu_util
+# - Adds util_cap and group_headroom, and computes:
+#     target_util = max(0.0, util_cap - group_headroom)
+# - Keeps alert flag based on smoothed global_util vs target_util.
+#
+# Notes
+# -----
+#   - ASCII only (no Unicode).
+#   - Jarvis ADA v4.8.1 compatible.
+#   - Uses a short EMA with rule-derived alpha and headroom.
+# ============================================================================
+
+from __future__ import annotations
+from typing import Dict, Any, Optional, Callable
+import time
+import threading
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store, append_telemetry
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+# ---------------------------------------------------------------------------
+# Minimal embedded rule manifest (token table placeholder)
+# ---------------------------------------------------------------------------
+
+def _fetch_rule_manifest() -> Dict[str, Any]:
+    # Minimal embedded token table for portability.
+    # These values are placeholders to derive stable alpha and headroom.
+    return {
+        "token_table": {
+            "@A": [0.191489, -0.106383],
+            "@B": [0.468085,  0.191489],
+            "@C": [-0.085106, 0.106383],
+            "@D": [0.319149, -0.680851],
+            "@E": [0.106383,  0.276596],
+            "@F": [-0.148936, 0.468085],
+            "@G": [0.063830, -0.425532]
+        }
+    }
+
+class RuleParams:
+    """
+    Rule-derived parameters:
+      - ema_alpha: smoothing strength based on token @C
+      - headroom: utilization headroom based on token @E
+    """
+    def __init__(self) -> None:
+        T = _fetch_rule_manifest()["token_table"]
+        def get(k: str) -> list:
+            return T.get(k, [0.0, 0.0])
+        self.A = get("@A"); self.B = get("@B"); self.C = get("@C")
+        self.D = get("@D"); self.E = get("@E"); self.F = get("@F"); self.G = get("@G")
+
+    @property
+    def ema_alpha(self) -> float:
+        # Constrain alpha into stable range (5%..35%)
+        return _clamp(0.20 + 0.15 * (self.C[1]), 0.05, 0.35)
+
+    @property
+    def headroom(self) -> float:
+        # Constrain headroom into [5%, 20%]
+        return _clamp(0.12 + 0.08 * (self.E[1] - 0.10), 0.05, 0.20)
+
+# ---------------------------------------------------------------------------
+# Simple EMA filter
+# ---------------------------------------------------------------------------
+
+class _EMA:
+    def __init__(self, alpha: float) -> None:
+        self.a = float(alpha)
+        self.y: Optional[float] = None
+    def update(self, x: float) -> float:
+        xv = float(x)
+        if self.y is None:
+            self.y = xv
+        else:
+            self.y = self.a * xv + (1.0 - self.a) * self.y
+        return self.y
+
+# ---------------------------------------------------------------------------
+# Monitor
+# ---------------------------------------------------------------------------
+
+class Monitor:
+    """
+    Reads raw telemetry via read_telemetry() and emits a smoothed frame
+    with canonical field names used by the rest of the system.
+
+    Input (from read_telemetry):
+      {
+        "timestamp": "...",            # optional
+        "global_util": float,          # optional (raw)
+        "gpu_util": float,             # optional (raw)
+        "gpu_mem_util": float,         # optional (raw)
+        "mem_bw_util": float,          # optional (raw)
+        "cpu_util": float,             # optional (raw)
+        "util_cap": float              # optional (default 0.75)
+      }
+
+    Output (smoothed + derived):
+      {
+        "timestamp": str (ISO),
+        "global_util": float,          # EMA-smoothed
+        "gpu_util": float,             # EMA-smoothed
+        "gpu_mem_util": float,         # EMA-smoothed
+        "mem_bw_util": float,          # EMA-smoothed
+        "cpu_util": float,             # EMA-smoothed
+        "util_cap": float,             # pass-through or default
+        "group_headroom": float,       # from RuleParams.headroom
+        "target_util": float,          # util_cap - group_headroom, floored at 0
+        "alert": bool                  # smoothed global_util > target_util - bias
+      }
+    """
+
+    def __init__(self, read_telemetry: Callable[[], Dict[str, Any]], util_cap: float = 0.75) -> None:
+        self.rule = RuleParams()
+        self.read = read_telemetry
+        # util_cap here is a default; live values may override each frame
+        self.util_cap_default = float(util_cap)
+
+        a = self.rule.ema_alpha
+        self._lock = threading.RLock()
+        self.ema_global = _EMA(a)
+        self.ema_gpu    = _EMA(a)
+        self.ema_gmem   = _EMA(a)
+        self.ema_bw     = _EMA(a)
+        self.ema_cpu    = _EMA(a)
+
+        # Alert bias: small negative offset controlled by token @D[0]
+        self.alert_bias = 0.02 * (self.rule.D[0])
+
+    def frame(self) -> Dict[str, Any]:
+        """
+        Return a compact dict suitable for logging, telemetry console,
+        and allocator logic. Values are EMA-smoothed but exposed under
+        canonical names expected by downstream modules.
+        """
+        with self._lock:
+            src = {}
+            try:
+                src = self.read() or {}
+            except Exception:
+                src = {}
+
+            # Read raw fields with safe defaults
+            raw_global = float(src.get("global_util", 0.0))
+            raw_gpu    = float(src.get("gpu_util", 0.0))
+            raw_gmem   = float(src.get("gpu_mem_util", 0.0))
+            raw_bw     = float(src.get("mem_bw_util", 0.0))
+            raw_cpu    = float(src.get("cpu_util", 0.0))
+            util_cap   = float(src.get("util_cap", self.util_cap_default))
+
+            # Apply EMA smoothing
+            sm_global = self.ema_global.update(raw_global)
+            sm_gpu    = self.ema_gpu.update(raw_gpu)
+            sm_gmem   = self.ema_gmem.update(raw_gmem)
+            sm_bw     = self.ema_bw.update(raw_bw)
+            sm_cpu    = self.ema_cpu.update(raw_cpu)
+
+            # Derived targets
+            head = self.rule.headroom
+            target = max(0.0, util_cap - head)
+            alert = (sm_global > (target - self.alert_bias))
+
+            # Timestamp: prefer source if provided, else generate
+            ts = str(src.get("timestamp", _now_iso()))
+
+            # Assemble canonical, smoothed frame
+            out = {
+                "timestamp": ts,
+                "global_util": sm_global,
+                "gpu_util": sm_gpu,
+                "gpu_mem_util": sm_gmem,
+                "mem_bw_util": sm_bw,
+                "cpu_util": sm_cpu,
+                "util_cap": util_cap,
+                "group_headroom": head,
+                "target_util": target,
+                "alert": bool(alert)
+            }
+
+            # Optionally pass-through any non-conflicting context
+            # (hardware inventory, identifiers, etc.)
+            hw = src.get("hardware")
+            if isinstance(hw, dict):
+                out["hardware"] = dict(hw)
+
+            return out
+
+# End of file

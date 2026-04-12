@@ -1,0 +1,47 @@
+# Quantum Application Dependencies
+# =================================
+
+# System monitoring and hardware
+psutil>=5.8.0
+GPUtil>=1.4.0
+pywin32>=305; platform_system == "Windows"  # Windows COM support for WMI
+wmi>=1.5.1; platform_system == "Windows"     # Task Manager GPU counters via WMI
+
+# HTTP and networking
+requests>=2.26.0
+
+# Environment variables
+python-dotenv>=0.19.0
+
+# Numerical computing (likely needed for quantum calculations)
+numpy>=1.21.0
+scipy>=1.7.0
+numba>=0.59.0
+
+# Mining algorithm backends
+# Active networks are configured in miner/miner_runtime_config.json.
+# ETC uses ethash/etchash on this repo path; pyethash is not required.
+ethash>=0.5.1
+
+# KawPoW backend (availability varies by platform)
+# Attempt to install both; the code imports `kawpow` then falls back to `pykawpow`.
+kawpow
+# If unavailable on your platform, install `pykawpow` manually when supported.
+
+
+# GUI Control Center (PySide6 + Matplotlib)
+PySide6>=6.5.0
+matplotlib>=3.7.0
+
+# Packaging / installer tooling (used on developer machines only)
+pyinstaller>=6.0.0
+
+# System libraries required for PySide6 on Linux (install via apt, not pip):
+#   sudo apt-get install -y libgl1 libxkbcommon-x11-0 libxcb-cursor0
+
+
+# Optional: Machine Learning (if Neuralis_AI needs it)
+# Uncomment if ML features are required:
+# scikit-learn>=1.0.0
+# tensorflow>=2.6.0
+# torch>=1.10.0

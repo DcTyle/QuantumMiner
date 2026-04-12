@@ -1,0 +1,240 @@
+
+"""
+vwh_qubit_manager.py — Virtual Qubit Manager (unified rule-block)
+- Tracks qubit slots per lane with rule-derived coherence decay.
+- Provides planning, ensure, refresh, and audit methods.
+"""
+
+from __future__ import annotations
+from typing import Dict, Any, Optional, List
+import time, math, random, json, hashlib
+from core import utils
+import math
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+from VHW.vqram import VQRAM
+
+
+# Unified rule-block loader and helpers (tokens @A–@G)
+# This helper is duplicated across modules for isolation and direct replacement.
+from typing import Dict, Any, List, Optional
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _now() -> float:
+    import time
+    return float(time.time())
+
+def _sha256(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return "".join(_float_to_ascii(x) for x in vec)
+
+def _fetch_rule_manifest() -> Dict[str, Any]:
+    """
+    Attempts to load the unified rule-block manifest from a canonical VSD path.
+    In this environment, the caller's ecosystem provides core.utils; if not
+    present, we return a sane default using the token table from the chat.
+    """
+    try:
+        from core import utils
+        m = utils.get("canonical/rule_blocks_unified", {})
+        if isinstance(m, dict) and m.get("token_table"):
+            return m
+    except Exception:
+        pass
+    # Fallback default (from user-provided JSON in chat)
+    return {
+        "token_table": {
+            "@A": [0.191489, -0.106383],
+            "@B": [0.468085,  0.191489],
+            "@C": [-0.085106, 0.106383],
+            "@D": [0.319149, -0.680851],
+            "@E": [0.106383,  0.276596],
+            "@F": [-0.148936, 0.468085],
+            "@G": [0.063830, -0.425532]
+        }
+    }
+
+class RuleParams:
+    """
+    Derives module-friendly coefficients from token pairs.
+    a,b pairs are mapped to:
+      anchor_a, anchor_b         (@A)
+      predict_a, predict_b       (@B)
+      stabil_a, stabil_b         (@C)
+      damp_a, damp_b             (@D)
+      bios_a, bios_b             (@E)
+      feedback_a, feedback_b     (@F)
+      harm_a, harm_b             (@G)
+    Provides convenience accessors for smoothing, damping, target util, etc.
+    """
+    def __init__(self, manifest: Optional[Dict[str, Any]] = None):
+        mf = manifest or _fetch_rule_manifest()
+        T = mf.get("token_table", {})
+        get = lambda k: T.get(k, [0.0, 0.0])
+        self.A = get("@A"); self.B = get("@B"); self.C = get("@C")
+        self.D = get("@D"); self.E = get("@E"); self.F = get("@F"); self.G = get("@G")
+
+    # smoothing alpha from stabilizer C
+    @property
+    def ema_alpha(self) -> float:
+        # map C to 0.05..0.35
+        return _clamp(0.20 + 0.15 * (self.C[1]), 0.05, 0.35)
+
+    # damping gain from D
+    @property
+    def damp_gain(self) -> float:
+        # map D to 0.2..0.8
+        return _clamp(0.5 + 0.3 * (self.D[0]), 0.2, 0.8)
+
+    # target util headroom from E
+    @property
+    def headroom(self) -> float:
+        # map E to 0.05..0.20
+        return _clamp(0.12 + 0.08 * (self.E[1] - 0.1), 0.05, 0.20)
+
+    # per-network capacity cap ratio (policy fixed to 0.20 but allow small offsets)
+    @property
+    def per_net_cap(self) -> float:
+        base = 0.20
+        jitter = 0.02 * (self.B[0] - self.B[1])
+        return _clamp(base + jitter, 0.15, 0.25)
+
+    # harmonics phase increment
+    @property
+    def phase_step(self) -> float:
+        return _clamp(0.010 + 0.010 * (self.G[0] + 0.2), 0.005, 0.025)
+
+    # coherence decay lambda
+    @property
+    def coherence_lambda(self) -> float:
+        return _clamp(0.0015 + 0.0035 * max(0.0, self.C[0] + 0.2), 0.001, 0.006)
+
+    # desirability attenuation vs difficulty
+    @property
+    def diff_attn(self) -> float:
+        return _clamp(1e-11 * (1.0 + 0.5 * self.D[1]), 1e-12, 5e-11)
+
+    # compute small harmonic bias
+    def harmonic_bias(self, phase: float) -> float:
+        import math
+        return 0.01 * math.sin(2.0 * math.pi * phase)
+
+
+def _health() -> Dict[str, int]:
+    h = utils.get("vhw/core/health", {})
+    if not isinstance(h, dict): h = {}
+    return {"tiers": int(h.get("tiers", 0) or 0), "lanes": int(h.get("lanes", 0) or 0)}
+
+def _bw_gbps() -> float:
+    return float(utils.get("hw/mem_bandwidth_gbps", 0.0) or 0.0)
+
+def _slots_per_lane() -> int:
+    return int(utils.get("vhw/qubits/slots_per_lane", 0) or 0)
+
+def _set_slots_per_lane(n: int) -> None:
+    utils.store("vhw/qubits/slots_per_lane", int(max(1, n)))
+
+def _lanes_all() -> List[str]:
+    lane_map = utils.get("vhw/lanes/map", {})
+    arr: List[str] = []
+    if isinstance(lane_map, dict):
+        for v in lane_map.values():
+            if isinstance(v, list):
+                arr.extend(v)
+    free = utils.get("vhw/lanes/free", [])
+    if isinstance(free, list):
+        for lid in free:
+            if lid not in arr: arr.append(lid)
+    return sorted(set(arr))
+
+def _lane_key(lane_id: str) -> str:
+    return f"vhw/qubits/lanes/{lane_id}/slots"
+
+def plan_slots() -> Dict[str, Any]:
+    rule = RuleParams()
+    bw = max(0.0, _bw_gbps())
+    base = max(1, int(pow(max(1.0, bw), 1.0/3.0) * 4.0))
+    slots = int(base * (0.75 + 0.5 * (0.75 - rule.headroom)))
+    slots = max(4, min(4096, slots))
+    _set_slots_per_lane(slots)
+    return {"slots_per_lane": slots, "bw_gbps": bw}
+
+def _ensure_lane_slots(lane_id: str, want: int) -> int:
+    arr = utils.get(_lane_key(lane_id), [])
+    if not isinstance(arr, list): arr = []
+    have = len(arr)
+    if have < want:
+        for _ in range(want - have):
+            arr.append(_new_slot())
+    elif have > want:
+        arr = arr[:want]
+    utils.store(_lane_key(lane_id), arr)
+    return len(arr)
+
+def _new_slot() -> Dict[str, Any]:
+    seed = hashlib.sha256(f"{_now()}:{random.random()}".encode("utf-8")).hexdigest()[:16]
+    return {"seed": seed, "coherence": 1.0, "age_s": 0.0, "token": "@"}
+
+def ensure_for_all_lanes() -> Dict[str, Any]:
+    slots = _slots_per_lane()
+    if slots <= 0:
+        slots = plan_slots()["slots_per_lane"]
+    lanes = _lanes_all()
+    total = 0
+    for lid in lanes:
+        total += _ensure_lane_slots(lid, slots)
+    utils.store("vhw/qubits/total", total)
+    return {"lanes": len(lanes), "slots_per_lane": slots, "qubits_total": total}
+
+def _decay(rule: RuleParams, age_s: float) -> float:
+    lam = rule.coherence_lambda
+    c = math.exp(-lam * max(0.0, age_s))
+    return max(0.1, min(1.0, c))
+
+def refresh_low_coherence(threshold: float = 0.5) -> Dict[str, Any]:
+    rule = RuleParams()
+    lanes = _lanes_all()
+    refreshed = 0; kept = 0
+    for lid in lanes:
+        key = _lane_key(lid)
+        arr = utils.get(key, [])
+        if not isinstance(arr, list): continue
+        new_arr: List[Dict[str, Any]] = []
+        for slot in arr:
+            coh = float(slot.get("coherence", 1.0))
+            age = float(slot.get("age_s", 0.0)) + 1.0
+            coh = _decay(rule, age)
+            if coh < threshold:
+                new_arr.append(_new_slot()); refreshed += 1
+            else:
+                slot["coherence"] = coh; slot["age_s"] = age; new_arr.append(slot); kept += 1
+        utils.store(key, new_arr)
+    return {"refreshed": refreshed, "kept": kept, "threshold": threshold, "lanes": len(lanes)}
+
+def lane_snapshot(lane_id: str) -> Dict[str, Any]:
+    arr = utils.get(_lane_key(lane_id), [])
+    if not isinstance(arr, list): arr = []
+    tail = arr[-8:]
+    return {"lane_id": lane_id, "slots": len(arr), "tail": tail}
+
+def audit() -> Dict[str, Any]:
+    lanes = _lanes_all(); slots = _slots_per_lane(); total = int(utils.get("vhw/qubits/total", 0) or 0)
+    return {"t_s": _now(), "lanes": len(lanes), "slots_per_lane": slots, "qubits_total": total}

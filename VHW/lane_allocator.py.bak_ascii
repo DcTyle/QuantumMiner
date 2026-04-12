@@ -1,0 +1,14 @@
+"""
+Backup file notice: VHW.lane_allocator has been removed.
+
+Use `VHW.compute_manager.ComputeManager` for lane creation and orchestration.
+This backup is intentionally neutralized to avoid accidental legacy usage.
+"""
+
+class _Removed:
+    def __getattr__(self, _):
+        raise ImportError(
+            "VHW.lane_allocator.bak removed; use VHW.compute_manager.ComputeManager"
+        )
+
+LaneAllocator = _Removed()

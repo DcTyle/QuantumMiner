@@ -1,0 +1,129 @@
+{
+  "coins": {
+    "BTC": {
+      "wallet": "dax97625.rig",
+      "pool_url": "stratum+tcp://btc.f2pool.com:1314",
+      "mode": "stratum",
+      "algorithm": "sha256d",
+      "port": 1314,
+      "difficulty_control_method": "pool_assigned",
+      "pool_submit_ceiling_per_second": 10.0,
+      "network_submit_ceiling_per_second": 10.0,
+      "pool_submit_guard_fraction": 0.90
+    },
+    "ETC": {
+      "wallet": "0x5119bF3205dbA22E58A7e9FD934c342fDD8Ab3",
+      "pool_url": "stratum+tcp://etc.2miners.com:1010",
+      "mode": "stratum",
+      "algorithm": "etchash",
+      "port": 1010,
+      "authorize_method": "mining.authorize",
+      "authorize_with_password": true,
+      "difficulty_control_method": "pool_assigned",
+      "pool_submit_ceiling_per_second": 30.0,
+      "network_submit_ceiling_per_second": 30.0,
+      "pool_submit_guard_fraction": 0.92
+    },
+    "RVN": {
+      "wallet": "RSYEUmpvdErLArh2SSqPfDPyfka1VpDrfc",
+      "pool_url": "stratum+tcp://rvn.2miners.com:6060",
+      "mode": "stratum",
+      "algorithm": "kawpow",
+      "port": 6060,
+      "difficulty_control_method": "pool_assigned",
+      "pool_submit_ceiling_per_second": 40.0,
+      "network_submit_ceiling_per_second": 40.0,
+      "pool_submit_guard_fraction": 0.92
+    }
+  },
+  "submission_rate": {
+    "fallback_allowed_rate_per_second": 2.0,
+    "target_acceptance_rate": 0.92,
+    "expected_weight": 0.7,
+    "observed_weight": 0.3,
+    "smoothing": 0.6,
+    "min_tick_duration_s": 0.05,
+    "jitter_fraction": 0.18,
+    "network_target_fraction": 0.05,
+    "network_target_fraction_floor": 0.05,
+    "network_target_fraction_ceiling": 0.05002,
+    "network_target_fraction_nominal": 0.05001,
+    "moderate_valid_share_rate_per_second": 2.0,
+    "preferred_valid_share_rate_per_second": 2.0,
+    "pool_submit_ceiling_per_second": 50.0,
+    "network_submit_ceiling_per_second": 50.0,
+    "pool_submit_guard_fraction": 0.985,
+    "difficulty_request_interval_s": 10.0,
+    "difficulty_request_change_fraction": 0.002
+  },
+  "miner_nonce": {
+    "default_mode": "gpu_vectorized",
+    "default_batch": 64,
+    "per_network": {
+      "BTC": {
+        "mode": "gpu_vectorized",
+        "batch": 64,
+        "sequence_scan": 256,
+        "gpu_batch_size": 2048,
+        "amplitude_floor": 0.10,
+        "amplitude_ceiling": 0.82,
+        "phase_stride_scale": 0.32,
+        "substrate_feedback_weight": 0.40,
+        "substrate_scan_boost": 96,
+        "mining_resonance_weight": 0.28,
+        "process_resonance_weight": 0.18,
+        "temporal_relativity_weight": 0.16,
+        "zero_point_line_weight": 0.14,
+        "field_interference_weight": 0.12,
+        "collapse_readiness_weight": 0.12,
+        "pulse_hash_audit_mode": false,
+        "pulse_hash_audit_count": 2000
+      },
+      "ETC": {
+        "mode": "gpu_vectorized",
+        "batch": 64,
+        "sequence_scan": 224,
+        "gpu_batch_size": 512,
+        "amplitude_floor": 0.12,
+        "amplitude_ceiling": 0.84,
+        "phase_stride_scale": 0.34,
+        "substrate_feedback_weight": 0.40,
+        "substrate_scan_boost": 96
+      },
+      "RVN": {
+        "mode": "gpu_vectorized",
+        "batch": 64,
+        "sequence_scan": 192,
+        "gpu_batch_size": 384,
+        "amplitude_floor": 0.14,
+        "amplitude_ceiling": 0.86,
+        "phase_stride_scale": 0.36,
+        "substrate_feedback_weight": 0.40,
+        "substrate_scan_boost": 96
+      }
+    }
+  },
+  "vhw_gpu_initiator": {
+    "sustain_pct": 0.05,
+    "program_id": "gpu_initiator_photonic",
+    "profile_name": "photonic_actuation",
+    "telemetry_mode": "live_startup",
+    "actuation_backend": "vulkan_calibration",
+    "capture_sleep": false,
+    "telemetry_sample_period_s": 0.05,
+    "loop_period_s": 0.25,
+    "history_size": 8,
+    "horizon_frames": 2,
+    "pulse_cycles": 1,
+    "memory_basin_count": 4,
+    "scheduler_zone_count": 4,
+    "active_zone_limit": 2,
+    "actuation_settle_s": 0.004,
+    "vulkan_element_count": 4096,
+    "vulkan_iterations": 12,
+    "vulkan_frequency": 0.245,
+    "vulkan_amplitude": 0.18,
+    "vulkan_voltage": 0.33,
+    "vulkan_current": 0.33
+  }
+}

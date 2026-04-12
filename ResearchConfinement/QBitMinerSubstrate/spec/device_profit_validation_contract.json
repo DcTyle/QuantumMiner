@@ -1,0 +1,46 @@
+{
+  "name": "qbit_miner_device_profit_validation_contract",
+  "version": 1,
+  "repository_role": "parallel_substrate_miner",
+  "device_required": true,
+  "substrate_native_only": true,
+  "primary_target_network": "bitcoin",
+  "stretch_network_share_target_percent": 5.0,
+  "stretch_target_is_guaranteed": false,
+  "research_completion_gate": {
+    "requires_device_operation": true,
+    "requires_positive_net_profit": true,
+    "requires_power_cost_accounting": true,
+    "requires_reproducible_profit_window": true
+  },
+  "required_runtime_capabilities": [
+    "phase_vector_temporal_accounting",
+    "substrate_native_microprocessing",
+    "9d_texture_state_persistence",
+    "phase_transport_resynchronization",
+    "accepted_share_measurement",
+    "power_telemetry_capture"
+  ],
+  "required_device_artifacts": [
+    "hardware_profile.json",
+    "profit_window.json",
+    "accepted_share_log.jsonl",
+    "power_telemetry.jsonl",
+    "substrate_state_snapshot.json",
+    "phase_vector_ledger.jsonl"
+  ],
+  "profit_window_required_fields": [
+    "window_start_utc",
+    "window_end_utc",
+    "gross_mined_value_usd",
+    "power_cost_usd",
+    "net_profit_usd",
+    "accepted_share_count",
+    "hardware_profile_id"
+  ],
+  "funding_model": {
+    "self_funding_research": true,
+    "description": "The device lane is intended to fund continued substrate research through measured profitable operation rather than simulation-only progress."
+  },
+  "completion_note": "Research is not considered complete until the device demonstrates positive net profit on real mining work with power cost accounted for."
+}

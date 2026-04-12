@@ -1,0 +1,19 @@
+{
+  "model": "live_compute_interference_ledger",
+  "live_compute_enabled": 1,
+  "live_compute_active": 0,
+  "activation_tick": 0,
+  "trajectory_spectral_id": 4595016631064689250,
+  "readiness_norm": 0.671987,
+  "interference_ledger_norm": 0.494565,
+  "encoded_extrapolation_norm": 0.480667,
+  "score_alignment_norm": 0.295343,
+  "trap_alignment_norm": 0.645513,
+  "coherence_alignment_norm": 0.179077,
+  "compute_quartet": {
+    "F": 0.275,
+    "A": 0.18825,
+    "I": 0.27,
+    "V": 0.320883
+  }
+}

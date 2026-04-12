@@ -1,0 +1,121 @@
+# ============================================================================
+# VirtualMiner / VHW
+# File: vhw_vqram.py
+# Directory: /VHW/
+# ASCII-ONLY SOURCE FILE
+# Note: This file avoids any non-ASCII characters. Jarvis ADA v4.7 Hybrid ready.
+# ============================================================================
+
+"""
+Purpose
+-------
+Virtual QRAM pager that stores and retrieves ascii_floatmap-compatible pages.
+Provides LRU eviction and memory-size hints. This is not a real memory
+manager; it is a simple in-memory index with deterministic behavior.
+
+Public API
+---------
+VQRAM(max_pages=256, page_size=256)
+  .put(name: str, vec: list[float]) -> dict meta
+  .get(name: str) -> dict or None
+  .touch(name: str) -> None
+  .stats() -> dict
+  .snapshot_catalog() -> dict ascii snapshot of catalog state
+"""
+
+from __future__ import annotations
+import time
+import hashlib
+from typing import Dict, Any, List, Optional
+import numpy as np
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return ''.join(_float_to_ascii(x) for x in vec)
+
+def _sha256(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+class VQRAM:
+    def __init__(self, max_pages: int = 256, page_size: int = 256):
+        self.max_pages = int(max(16, max_pages))
+        self.page_size = int(max(32, page_size))
+        self._idx: Dict[str, Dict[str, Any]] = {}
+        self._lru: List[str] = []
+        self._t0 = time.time()
+
+    def _ensure_room(self):
+        while len(self._idx) > self.max_pages:
+            victim = self._lru.pop(0)
+            self._idx.pop(victim, None)
+
+    def put(self, name: str, vec: List[float]) -> Dict[str, Any]:
+        if not isinstance(name, str) or not name:
+            raise ValueError("name is required")
+        vec = list(vec)[:self.page_size]
+        if len(vec) < self.page_size:
+            vec = vec + [0.0] * (self.page_size - len(vec))
+        tok = _ascii_from_vector(vec)
+        meta = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "size": self.page_size,
+            "hash": _sha256(tok)
+        }
+        self._idx[name] = {"header": meta, "vector_ascii": tok, "last": time.time()}
+        if name in self._lru:
+            self._lru.remove(name)
+        self._lru.append(name)
+        self._ensure_room()
+        return {"name": name, "header": meta}
+
+    def get(self, name: str) -> Optional[Dict[str, Any]]:
+        rec = self._idx.get(name)
+        if not rec:
+            return None
+        self.touch(name)
+        return {"header": dict(rec["header"]), "vector_ascii": rec["vector_ascii"]}
+
+    def touch(self, name: str):
+        if name in self._lru:
+            self._lru.remove(name)
+        self._lru.append(name)
+        if name in self._idx:
+            self._idx[name]["last"] = time.time()
+
+    def stats(self) -> Dict[str, Any]:
+        age = time.time() - self._t0
+        return {
+            "pages": len(self._idx),
+            "max_pages": self.max_pages,
+            "page_size": self.page_size,
+            "uptime_s": int(age),
+            "lru": list(self._lru[-8:])
+        }
+
+    def snapshot_catalog(self) -> Dict[str, Any]:
+        names = sorted(self._idx.keys())
+        vec = [
+            _clamp(len(names) / float(max(1, self.max_pages)), 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(self.page_size / 4096.0, 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(len(self._lru) / float(max(1, self.max_pages)), 0.0, 1.0) * 2.0 - 1.0,
+        ]
+        tok = _ascii_from_vector(vec)
+        return {"header": {"encoding": "ascii_floatmap_v1", "timestamp": time.time()}, "vector_ascii": tok}

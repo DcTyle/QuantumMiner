@@ -1,0 +1,173 @@
+{
+  "transport_prediction": {
+    "observed_quartet": {
+      "F": 0.21264,
+      "A": 0.156796,
+      "I": 0.324114,
+      "V": 0.313217
+    },
+    "observed_quartet_norm": {
+      "F": 0.5203076923076922,
+      "A": 0.3066333333333333,
+      "I": 0.2081307692307692,
+      "V": 0.24009444444444447
+    },
+    "phase_turns": 0.748101,
+    "phase_turns_previous": 0.708101,
+    "phase_turns_next": 0.769163837614651,
+    "phase_memory_delta_turns": 0.040000000000000036,
+    "phase_delta_turns": 0.02106283761465102,
+    "reverse_delta_turns": 0.0,
+    "reverse_gate": 0.0,
+    "transport_drive_norm": 0.3150803788672496,
+    "flux_transport_norm": 0.19781603610519652,
+    "observer_feedback_norm": 0.6150972692195044,
+    "constraint_mutation_norm": 0.15619565736,
+    "noise_pressure_norm": 0.08655422456480001,
+    "predicted_interference_norm": 0.101346,
+    "temporal_overlap_norm": 0.278667,
+    "thermal_noise_norm": 0.0238471,
+    "subsystem_feedback_norm": 0.204828328,
+    "dominant_spin_axis": "y",
+    "dominant_spin_value": -0.0672503222056048,
+    "axis_dynamics": {
+      "axis_scale_x": 0.6152257547309401,
+      "axis_scale_y": 0.4401253233333333,
+      "axis_scale_z": 0.4322444205259825,
+      "axis_resonance": 0.8780124438633616,
+      "phase_turns": 0.748101,
+      "vector_energy": 0.2176052110909312,
+      "speed_measure": 0.3158940431006175,
+      "relativistic_correlation": 0.01973062563824044,
+      "temporal_coupling_moment": 0.5760434394661968,
+      "spin_axis_x": 0.06614708952629092,
+      "spin_axis_y": -0.0672503222056048,
+      "spin_axis_z": -0.02567256567141206,
+      "spin_momentum_score": 0.05644207626026814,
+      "inertial_mass_proxy": 0.19524478999435707
+    },
+    "noise_redistribution_norm": {
+      "F": 0.0010021341697320505,
+      "A": 0.003394634122534602,
+      "I": -0.003800524326898663,
+      "V": -0.0005962439653679916
+    },
+    "next_quartet_norm": {
+      "F": 0.4814719615839895,
+      "A": 0.36831451431822665,
+      "I": 0.18220272786923866,
+      "V": 0.24317703554478415
+    },
+    "next_pulse_quartet": {
+      "F": 0.20759135500591863,
+      "A": 0.16419774171818718,
+      "I": 0.3173727092460021,
+      "V": 0.31377186639806115
+    },
+    "deviation_metrics": {
+      "score": 0.6282250828836017,
+      "trap": 0.094674296692953,
+      "coherence": 0.9959997802179207,
+      "inertia": 0.0005148060573980512,
+      "curvature": 31.454874670983266
+    },
+    "predicted_metrics": {
+      "score": 0.628855349454558,
+      "trap": 0.09404582604737045,
+      "coherence": 0.9960048274623482,
+      "inertia": 0.00051706336991426,
+      "curvature": 33.67736609246914
+    },
+    "power_proxy_norm": 0.2104935135138717,
+    "accounting": {
+      "energy_before_norm": 1.275166239316239,
+      "energy_after_raw_norm": 1.356069951383088,
+      "energy_after_norm": 1.275166239316239,
+      "energy_correction_ratio": 0.9403395732024492,
+      "conservation_error_norm": 0.0,
+      "field_path_speed_rating": 0.3158940431006175,
+      "vector_path_energy_rating": 0.1431727005111044,
+      "power_proxy_norm": 0.2104935135138717,
+      "accounting_vector_9d": [
+        0.769163837614651,
+        0.6152257547309401,
+        0.4401253233333333,
+        0.4322444205259825,
+        0.2176052110909312,
+        0.3158940431006175,
+        0.05644207626026814,
+        0.19524478999435707,
+        0.2104935135138717
+      ]
+    }
+  },
+  "photonic_identity": {
+    "photonic_identity": "PID-86BA64C8FF9CFC71",
+    "trajectory_spectral_id_u64": 9708182761195240561,
+    "spectra_axes": [
+      "phase",
+      "axis_x",
+      "axis_y",
+      "axis_z",
+      "flux",
+      "coherence",
+      "spin",
+      "inertia",
+      "feedback"
+    ],
+    "spectra_q15": [
+      25203,
+      20159,
+      14422,
+      14163,
+      3321,
+      32636,
+      1849,
+      6398,
+      6712
+    ],
+    "dominant_spin_axis": "y"
+  },
+  "encoded_words": {
+    "axis_word": 2641391251,
+    "spin_word": 286328590,
+    "inertia_word": 926025151,
+    "transport_word": 3288704788,
+    "telemetry_word": 385751092
+  },
+  "encoding_activation_path": {
+    "predict_ahead": true,
+    "wait_for_observed_pulse": false,
+    "transport_mode": "phase_flux_predictive",
+    "required_activation_pulse": {
+      "F": 0.20759135500591863,
+      "A": 0.16419774171818718,
+      "I": 0.3173727092460021,
+      "V": 0.31377186639806115
+    },
+    "basis_phase_turns": 0.748101,
+    "basis_phase_turns_next": 0.769163837614651,
+    "basis_trajectory_spectral_id_u64": 9708182761195240561,
+    "conservation_error_norm": 0.0
+  },
+  "live_telemetry_path": {
+    "channel": "research.photonic.live",
+    "phase_turns_next": 0.769163837614651,
+    "next_pulse_quartet": {
+      "F": 0.20759135500591863,
+      "A": 0.16419774171818718,
+      "I": 0.3173727092460021,
+      "V": 0.31377186639806115
+    },
+    "observer_feedback_norm": 0.6150972692195044,
+    "reverse_delta_turns": 0.0,
+    "noise_redistribution_norm": {
+      "F": 0.0010021341697320505,
+      "A": 0.003394634122534602,
+      "I": -0.003800524326898663,
+      "V": -0.0005962439653679916
+    },
+    "trajectory_spectral_id_u64": 9708182761195240561
+  },
+  "source_surface": "D:\\QC\\QuantumMiner\\ResearchConfinement\\gpu_kernel_interference_prediction_surface.json"
+}

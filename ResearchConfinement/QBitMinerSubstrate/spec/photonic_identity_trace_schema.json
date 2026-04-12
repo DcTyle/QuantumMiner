@@ -1,0 +1,109 @@
+{
+  "name": "photonic_identity_trace_schema",
+  "version": 1,
+  "required_top_level_fields": [
+    "trace_id",
+    "source_identity",
+    "gpu_device_id",
+    "spectra_9d",
+    "field_vector",
+    "spin_inertia",
+    "coherence",
+    "memory",
+    "nexus",
+    "request_time_ms",
+    "response_time_ms",
+    "accounting_time_ms",
+    "next_feedback_time_ms",
+    "closed_loop_latency_ms",
+    "encode_deadline_ms",
+    "encodable_node_count",
+    "trajectory_9d",
+    "encoded_pulse",
+    "rotational_velocity",
+    "phase_transport",
+    "flux_transport",
+    "observer_factor",
+    "coupling_strength",
+    "coupling_collision_noise",
+    "temporal_dynamics_noise",
+    "reverse_causal_flux_coherence",
+    "zero_point_overlap_score",
+    "constant_phase_alignment",
+    "trajectory_conservation_score",
+    "expansion_factor",
+    "calibration_plan",
+    "substrate_inertia"
+  ],
+  "calibration_plan_fields": [
+    "minimal_wavelength_step",
+    "trajectory_conservation_score",
+    "zero_point_overlap_score",
+    "reverse_causal_flux_coherence",
+    "sweeps"
+  ],
+  "calibration_sweep_fields": [
+    "variable",
+    "direction",
+    "wavelength_step",
+    "predicted_zero_point_overlap",
+    "predicted_constant_phase_alignment"
+  ],
+  "field_vector_fields": [
+    "amplitude",
+    "voltage",
+    "current",
+    "frequency",
+    "phase",
+    "flux",
+    "thermal_noise",
+    "field_noise"
+  ],
+  "spin_inertia_fields": [
+    "axis_spin",
+    "axis_orientation",
+    "momentum_score",
+    "inertial_mass_proxy",
+    "relativistic_correlation",
+    "relative_temporal_coupling",
+    "temporal_coupling_count"
+  ],
+  "array_lengths": {
+    "spectra_9d": 9,
+    "trajectory_9d": 9,
+    "encoded_pulse": 3,
+    "rotational_velocity": 3,
+    "axis_spin": 3,
+    "axis_orientation": 3
+  },
+  "calibration_variable_order": [
+    "frequency",
+    "amplitude",
+    "voltage",
+    "current"
+  ],
+  "calibration_direction_order": [
+    "left_to_right",
+    "right_to_left",
+    "top_to_bottom",
+    "bottom_to_top"
+  ],
+  "invariants": [
+    "response_time_ms >= request_time_ms",
+    "accounting_time_ms >= 0",
+    "next_feedback_time_ms >= 0",
+    "closed_loop_latency_ms >= response_time_ms",
+    "encode_deadline_ms >= 0",
+    "encodable_node_count >= 0",
+    "coupling_strength >= 0",
+    "coupling_collision_noise >= 0",
+    "temporal_dynamics_noise >= 0",
+    "reverse_causal_flux_coherence >= 0",
+    "zero_point_overlap_score >= 0",
+    "constant_phase_alignment >= 0",
+    "trajectory_conservation_score >= 0",
+    "expansion_factor >= 1",
+    "substrate_inertia >= 0",
+    "0 <= observer_factor <= 1"
+  ]
+}

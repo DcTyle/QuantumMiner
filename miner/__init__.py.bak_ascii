@@ -1,0 +1,55 @@
+# ============================================================================
+# VirtualMiner / miner
+# ASCII-ONLY SOURCE FILE
+# File: __init__.py
+# Version: v4.8.3 (Unified Imports + AI/VSD Integration)
+# Jarvis ADA v4.8.3 Hybrid Compatible
+# ============================================================================
+"""
+Purpose
+-------
+Initialization for the miner package.
+Exposes all active modules so higher-level components
+(bios, core, vhw, prediction_engine) can import them cleanly.
+
+Loaded Modules
+--------------
+- share_allocator      : lane + network distribution logic
+- failsafe             : pruning and reconnect logic
+- telemetry_contract   : defines data format and VSD interface
+- miner_runtime        : main loop control and process hooks
+- miner_runtime_config : network ports, wallet map, system settings
+- pool_stats           : live pool status get / update
+- scheduler            : internal work scheduler interface
+- utils_miner          : miner-specific helper utilities
+"""
+
+from __future__ import annotations
+
+# ---------------------------------------------------------------------------
+# Primary miner modules
+# ---------------------------------------------------------------------------
+try:
+    from VHW.share_allocator import ShareAllocator
+    from VHW.failsafe import FailsafeGovernor
+    from VHW.telemetry_contract import TelemetryContract
+    from miner.miner_runtime import MinerRuntime
+    from miner.miner_runtime_config import MinerRuntimeConfig
+    from miner.pool_stats import PoolStats
+    from miner.scheduler import MinerScheduler
+    from miner.utils_miner import *
+except Exception as e:
+    print(f"[miner.__init__] Warning: one or more modules failed to import: {e}")
+
+# ---------------------------------------------------------------------------
+# Public export list
+# ---------------------------------------------------------------------------
+__all__ = [
+    "ShareAllocator",
+    "FailsafeGovernor",
+    "TelemetryContract",
+    "MinerRuntime",
+    "MinerRuntimeConfig",
+    "PoolStats",
+    "MinerScheduler"
+]

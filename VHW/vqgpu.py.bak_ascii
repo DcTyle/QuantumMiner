@@ -1,0 +1,175 @@
+# ============================================================================
+# VirtualMiner / VHW
+# File: vhw_vqgpu.py
+# Directory: /VHW/
+# ASCII-ONLY SOURCE FILE
+# Note: This file avoids any non-ASCII characters. Jarvis ADA v4.7 Hybrid ready.
+# ============================================================================
+
+"""
+Purpose
+-------
+Virtual QGPU loop that produces deterministic utilization samples and
+capacity hints for the rest of the stack. Designed to be thread safe,
+ASCII-only, and dependency-light.
+
+Public API
+---------
+VQGPU(rule_alpha=0.20)
+  .start(interval_s=0.5)
+  .stop(timeout=2.0)
+  .read() -> dict telemetry
+  .inject_hardware(vram_mb, mem_bw_gbps, cpu_ghz)
+  .set_util_cap(x)
+  .snapshot_statevector() -> dict ascii_floatmap_v1
+
+Notes
+-----
+This module does not talk to real hardware. It generates synthetic
+but stable signals to exercise the pipeline.
+"""
+
+from __future__ import annotations
+import time
+import math
+import threading
+from typing import Dict, Any, Optional
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from VHW.vqram import VQRAM
+from core.utils import get, store
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec):
+    return ''.join(_float_to_ascii(x) for x in vec)
+
+def _sha256(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+class _EMA:
+    def __init__(self, a: float):
+        self.a = float(a)
+        self.y = None
+    def update(self, x: float) -> float:
+        if self.y is None:
+            self.y = x
+        else:
+            self.y = self.a * x + (1.0 - self.a) * self.y
+        return self.y
+
+class VQGPU:
+    def __init__(self, rule_alpha: float = 0.20):
+        self.gpu = _EMA(rule_alpha)
+        self.gmem = _EMA(rule_alpha)
+        self.mbw = _EMA(rule_alpha)
+        self.cpu = _EMA(rule_alpha)
+        self.util_cap = 0.75
+        self.group_headroom = 0.10
+        self.vram_mb = 8192.0
+        self.mem_bw_gbps = 448.0
+        self.cpu_ghz = 4.0
+        self.t0 = time.time()
+        self.phase = 0.0
+        self._lock = threading.RLock()
+        self._stop = False
+        self._thread = None
+        self._last_pub: Dict = {}
+
+    def start(self, interval_s: float = 0.5):
+        if self._thread: return
+        self._stop = False
+        self._thread = threading.Thread(target=self._loop, args=(interval_s,), daemon=True)
+        self._thread.start()
+
+    def stop(self, timeout: float = 2.0):
+        if not self._thread: return
+        self._stop = True
+        self._thread.join(timeout=timeout)
+        self._thread = None
+
+    def _osc(self, k: float, bias: float, amp: float) -> float:
+        t = time.time() - self.t0
+        return _clamp(bias + amp * math.sin(k * t + 0.13), 0.0, 1.0)
+
+    def _tick(self):
+        with self._lock:
+            gu = self.gpu.update(self._osc(0.7, 0.64, 0.18))
+            gm = self.gmem.update(self._osc(0.5, 0.58, 0.22))
+            bw = self.mbw.update(self._osc(0.6, 0.52, 0.25))
+            cu = self.cpu.update(self._osc(0.9, 0.35, 0.15))
+            base = 0.45 * gu + 0.25 * gm + 0.20 * bw + 0.10 * cu
+            if base > self.util_cap:
+                base = self.util_cap + 0.4 * (base - self.util_cap)
+            self.phase = (self.phase + 0.013) % 1.0
+            comp = _clamp(base + 0.01 * math.sin(2 * math.pi * self.phase), 0.0, 1.0)
+            self._last_pub = {
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "global_util": comp,
+                "gpu_util": gu,
+                "gpu_mem_util": gm,
+                "mem_bw_util": bw,
+                "cpu_util": cu,
+                "hardware": {
+                    "vram_mb": int(self.vram_mb),
+                    "mem_bw_gbps": float(self.mem_bw_gbps),
+                    "cpu_ghz": float(self.cpu_ghz),
+                },
+                "util_cap": self.util_cap,
+                "group_headroom": self.group_headroom,
+                "phase": self.phase,
+                "network_capacity": {}
+            }
+
+    def _loop(self, interval_s: float):
+        while not self._stop:
+            try:
+                self._tick()
+            except Exception:
+                pass
+            time.sleep(max(0.05, float(interval_s)))
+
+    def read(self) -> Dict:
+        with self._lock:
+            return dict(self._last_pub)
+
+    def inject_hardware(self, vram_mb: float, mem_bw_gbps: float, cpu_ghz: float):
+        with self._lock:
+            self.vram_mb = float(vram_mb)
+            self.mem_bw_gbps = float(mem_bw_gbps)
+            self.cpu_ghz = float(cpu_ghz)
+
+    def set_util_cap(self, x: float):
+        with self._lock:
+            self.util_cap = _clamp(float(x), 0.10, 0.95)
+
+    def snapshot_statevector(self) -> Dict:
+        d = self.read() or {}
+        vec = [
+            _clamp(d.get("global_util", 0.0), 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(d.get("gpu_util", 0.0), 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(d.get("gpu_mem_util", 0.0), 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(d.get("mem_bw_util", 0.0), 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(d.get("cpu_util", 0.0), 0.0, 1.0) * 2.0 - 1.0,
+        ]
+        tokenized = _ascii_from_vector(vec)
+        meta = {
+            "type": "json_statevector_v2",
+            "encoding": "ascii_floatmap_v1",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "hash": _sha256(tokenized),
+        }
+        return {"header": meta, "vector_ascii": tokenized}

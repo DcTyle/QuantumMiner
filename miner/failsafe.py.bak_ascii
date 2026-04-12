@@ -1,0 +1,139 @@
+# ============================================================================
+# Quantum Application / miner
+# File: miner_engine.py
+# Version: v4.8.3 Hybrid (flat imports; AI-Processor + Murphy ready)
+# ============================================================================
+"""
+Purpose
+-------
+Central mining engine for VirtualMiner.
+Coordinates lane allocator, share allocator, and failsafe governor.
+Polls telemetry and updates performance metrics each tick.
+
+Changes in v4.8.3
+-----------------
+- Flat imports (no folder prefixes)
+- AI_Processor integration for optional autosnapshot
+- Simplified live metrics logging to VSD
+"""
+
+from __future__ import annotations
+from typing import Dict, Any, Callable, Optional
+import time
+import threading
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import append_telemetry
+
+
+try:
+    from core.AI_processor import Dehydrator
+except Exception:
+    Dehydrator = None  # type: ignore
+
+# ---------------------------------------------------------------------------
+# Miner Engine
+# ---------------------------------------------------------------------------
+class MinerEngine:
+    def __init__(self,
+                 allocator: Any,
+                 share_allocator: Any,
+                 failsafe: Optional[FailsafeGovernor],
+                 read_telemetry: Any,
+                 vsd: Any,
+                 tick_interval_s: float = 0.25,
+                 network_cfg: Optional[Dict[str, Any]] = None) -> None:
+
+        self.allocator = allocator
+        self.share_allocator = share_allocator
+        self.failsafe = failsafe
+        self.read_telemetry = read_telemetry
+        self.vsd = vsd
+        self.tick_interval_s = float(tick_interval_s)
+        self.network_cfg = network_cfg or {}
+
+        self._stop = False
+        self._thr: Optional[threading.Thread] = None
+        self.iterations = 0
+        self.last_snapshot_path = ""
+
+    # ---------------------------------------------------------------------
+    def start(self) -> None:
+        if self._thr:
+            return
+        self._stop = False
+        self._thr = threading.Thread(target=self._loop, daemon=True, name="miner_engine")
+        self._thr.start()
+
+    # ---------------------------------------------------------------------
+    def stop(self, timeout: float = 2.0) -> None:
+        if not self._thr:
+            return
+        self._stop = True
+        self._thr.join(timeout=timeout)
+        self._thr = None
+        # optional AI snapshot on graceful stop
+        try:
+            if Dehydrator is not None:
+                stamp = time.strftime("%Y%m%d_%H%M%S", time.gmtime())
+                out_root = os.path.join("VHW", "VD", "state_vectors")
+                os.makedirs(out_root, exist_ok=True)
+                out_json = os.path.join(out_root, f"miner_engine_snapshot_{stamp}.json")
+                Dehydrator().pack(".", out_json)
+                self.last_snapshot_path = out_json
+                self.vsd.store("snapshots/last_engine_state", out_json)
+        except Exception:
+            pass
+
+    # ---------------------------------------------------------------------
+    def _loop(self) -> None:
+        while not self._stop:
+            try:
+                frame = self.read_telemetry() or {}
+                append_telemetry("miner_engine_tick", frame)
+
+                # optional allocator and share updates
+                if hasattr(self.allocator, "tick"):
+                    try:
+                        self.allocator.tick(frame)
+                    except Exception:
+                        pass
+
+                if hasattr(self.share_allocator, "tick"):
+                    try:
+                        self.share_allocator.tick(frame)
+                    except Exception:
+                        pass
+
+                # failsafe monitoring
+                if self.failsafe and hasattr(self.failsafe, "check_health"):
+                    try:
+                        self.failsafe.check_health(frame)
+                    except Exception:
+                        pass
+
+                self.iterations += 1
+            except Exception:
+                pass
+
+            time.sleep(self.tick_interval_s)
+
+    # ---------------------------------------------------------------------
+    def stats(self) -> Dict[str, Any]:
+        try:
+            alloc_stats = getattr(self.allocator, "status", lambda: {})()
+        except Exception:
+            alloc_stats = {}
+        try:
+            share_stats = getattr(self.share_allocator, "counters", lambda: {})()
+        except Exception:
+            share_stats = {}
+        return {
+            "iterations": self.iterations,
+            "allocator": alloc_stats,
+            "share_allocator": share_stats,
+            "last_snapshot": self.vsd.get("snapshots/last_engine_state", ""),
+        }
+
+# End of file

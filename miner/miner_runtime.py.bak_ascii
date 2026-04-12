@@ -1,0 +1,130 @@
+# ============================================================================
+# VirtualMiner / MINER
+# File: miner_runtime.py
+# Directory: /miner/
+# ASCII-ONLY SOURCE FILE
+# Jarvis ADA v4.7 Hybrid Ready � Live-Mode Runtime
+# ============================================================================
+"""
+Purpose
+-------
+Runtime entry point for live mining operation.
+Integrates with BIOS-booted environment and uses
+real-time telemetry + network capacity data.
+
+Design
+------
+- No simulation or synthetic telemetry.
+- All telemetry pulled from BIOS environment.
+- Allocator enforces 20 percent per-network cap.
+- Market/pool data and submitter hooks wired through
+  the Miner Engine.
+
+Public Surface
+--------------
+build(env: dict) -> dict stack  
+run(stack: dict) -> dict result  
+main(env: dict) -> dict result
+"""
+
+from __future__ import annotations
+from typing import Dict, Any, Optional
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from bios.boot import BIOSBoot
+from miner.miner_engine import MinerEngine
+from miner.failsafe import FailsafeGovernor
+from VHW.share_allocator import ShareAllocator
+from core.utils import get, store, delete
+from ComputeManager import ComputeManager
+
+
+# ---------------------------------------------------------------------------
+# Build phase
+# ---------------------------------------------------------------------------
+
+def build(env: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Construct the live miner stack from BIOS environment.
+    """
+    read_tel = env.get("telemetry_reader")
+    network_capacity_fn = env.get("network_capacity_fn")
+
+    if not callable(read_tel) or not callable(network_capacity_fn):
+        raise RuntimeError("BIOS environment missing telemetry or network capacity function")
+
+    # LaneAllocator removed; allocator unavailable in backup runtime
+    allocator = None
+
+    # Failsafe governor linkage
+    failsafe = FailsafeGovernor(
+        list_lanes=lambda: [
+            {
+                "lane_id": L.lane_id,
+                "network": L.network,
+                "active": L.active,
+                "tier_id": L.tier_id,
+                "util_est": L.util_est,
+                "hashrate_est": L.hashrate_est,
+            }
+            for L in allocator.lanes.values()
+        ],
+        disable_lane=lambda lid: setattr(allocator.lanes[lid], "active", False),
+        difficulty_of=lambda net: allocator.difficulty_table.get(net, 1.0),
+    )
+
+    # Share allocator linked to live telemetry
+    share_alloc = ShareAllocator(
+        read_telemetry=read_tel,
+        list_active_lanes=allocator.list_active,
+        read_lane_state=lambda lid: allocator.lanes[lid].__dict__,
+        per_network_cap_ratio=0.20,
+        difficulty_table=allocator.difficulty_table,
+    )
+
+    # Miner engine (full live integration)
+    engine = MinerEngine(
+        allocator=allocator,
+        share_allocator=share_alloc,
+        failsafe=failsafe,
+        read_telemetry=read_tel,
+        tick_interval_s=0.25,
+        network_cfg=network_capacity_fn(),
+    )
+
+    return {
+        "allocator": allocator,
+        "share_allocator": share_alloc,
+        "failsafe": failsafe,
+        "engine": engine,
+        "read_telemetry": read_tel,
+        "network_capacity_fn": network_capacity_fn,
+    }
+
+# ---------------------------------------------------------------------------
+# Run loop
+# ---------------------------------------------------------------------------
+
+def run(stack: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Continuous live run loop � no auto-shutdown.
+    The scheduler or watchdog controls lifecycle.
+    """
+    engine = stack["engine"]
+    engine.start()
+    while True:
+        time.sleep(1.0)
+
+# ---------------------------------------------------------------------------
+# Entry for BIOS
+# ---------------------------------------------------------------------------
+
+def main(env: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    BIOS-compatible entry that builds and runs the miner.
+    """
+    stack = build(env)
+    run(stack)
+    return {"ok": True}

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Repo-scoped pre-push hook. To enable for all contributors:
+#   git config core.hooksPath .githooks
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")"/.. && pwd)"
+cd "$ROOT_DIR"
+
+if [ -x scripts/verify.sh ]; then
+  echo "[pre-push] Running verify script..."
+  ./scripts/verify.sh
+else
+  echo "[pre-push] scripts/verify.sh not found or not executable; skipping"
+fi

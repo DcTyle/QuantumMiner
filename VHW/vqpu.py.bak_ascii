@@ -1,0 +1,124 @@
+# ============================================================================
+# VirtualMiner / VHW
+# File: vhw_vqpu.py
+# Directory: /VHW/
+# ASCII-ONLY SOURCE FILE
+# Note: This file avoids any non-ASCII characters. Jarvis ADA v4.7 Hybrid ready.
+# ============================================================================
+
+"""
+Purpose
+-------
+Virtual QPU evolution loop. Produces a reversible ascii_floatmap sequence
+that can be snapshotted and rehydrated. This is a conceptual simulator
+for the Jarvis ADA stack and does not model physical qubits.
+
+Public API
+---------
+VQPU(size=64)
+  .start(interval_s=0.2)
+  .stop(timeout=2.0)
+  .step() -> dict evolution sample
+  .snapshot_statevector() -> dict ascii_floatmap_v1
+
+Behavior
+--------
+The evolution is a lightweight vector rotation and damping process that
+remains deterministic under constant seed and inputs.
+"""
+
+from __future__ import annotations
+import time
+import math
+import threading
+from typing import List, Dict, Any, Optional
+import numpy as np
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return ''.join(_float_to_ascii(x) for x in vec)
+
+def _sha256(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+class VQPU:
+    def __init__(self, size: int = 64):
+        self.size = int(max(8, min(512, size)))
+        self.vec = [0.0 for _ in range(self.size)]
+        self.phase = 0.0
+        self._lock = threading.RLock()
+        self._stop = False
+        self._thread = None
+        self._last_sample: Dict = {}
+
+    def start(self, interval_s: float = 0.2):
+        if self._thread: return
+        self._stop = False
+        self._thread = threading.Thread(target=self._loop, args=(interval_s,), daemon=True)
+        self._thread.start()
+
+    def stop(self, timeout: float = 2.0):
+        if not self._thread: return
+        self._stop = True
+        self._thread.join(timeout=timeout)
+        self._thread = None
+
+    def _tick(self):
+        with self._lock:
+            self.phase = (self.phase + 0.021) % 1.0
+            w = 2.0 * math.pi * self.phase
+            damp = 0.995
+            for i in range(self.size):
+                basis = math.sin(w + 0.07 * i)
+                self.vec[i] = _clamp(damp * self.vec[i] + 0.02 * basis, -1.0, 1.0)
+            tokenized = _ascii_from_vector(self.vec[:64] if self.size >= 64 else self.vec + [0.0]*(64 - self.size))
+            self._last_sample = {
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "phase": self.phase,
+                "vector_ascii_64": tokenized,
+                "hash": _sha256(tokenized)
+            }
+
+    def _loop(self, interval_s: float):
+        while not self._stop:
+            try:
+                self._tick()
+            except Exception:
+                pass
+            time.sleep(max(0.02, float(interval_s)))
+
+    def step(self) -> Dict:
+        self._tick()
+        with self._lock:
+            return dict(self._last_sample)
+
+    def snapshot_statevector(self) -> Dict:
+        with self._lock:
+            tok = _ascii_from_vector(self.vec)
+            return {
+                "header": {
+                    "type": "json_statevector_v2",
+                    "encoding": "ascii_floatmap_v1",
+                    "size": self.size,
+                    "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "hash": _sha256(tok)
+                },
+                "vector_ascii": tok
+            }

@@ -1,0 +1,100 @@
+# ASCII only
+# ================================================================
+# File: miner/crypto_com_api.py
+# Purpose: Read-only balances fetcher for Crypto.com Exchange.
+#          Uses API key and secret from a .env file or environment.
+# ================================================================
+
+from __future__ import annotations
+from typing import Dict, Any, Optional
+import time
+import hmac
+import hashlib
+import base64
+import json
+import requests
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+
+
+# ---------------------------------------------------------------
+# Auto-load .env file if present in project root
+# ---------------------------------------------------------------
+try:
+    from dotenv import load_dotenv
+    # assume project root is one directory up from /miner/
+    env_path = Path(__file__).resolve().parent.parent / ".env"
+    if env_path.exists():
+        load_dotenv(dotenv_path=env_path)
+except Exception:
+    # dotenv not installed or failed to load — safe to ignore
+    pass
+
+
+class CryptoComAPI:
+    """
+    Thin wrapper for the Crypto.com Exchange private API (read-only).
+    Automatically loads API credentials from environment variables:
+        CRYPTOCOM_API_KEY
+        CRYPTOCOM_API_SECRET
+    """
+
+    def __init__(self):
+        self._api_key = os.getenv("CRYPTOCOM_API_KEY", "")
+        self._api_secret = os.getenv("CRYPTOCOM_API_SECRET", "")
+        self._cache: Dict[str, Any] = {}
+        self._last_update = 0.0
+        self._ttl = 3600  # seconds
+
+    # -----------------------------------------------------------
+    def _sign(self, payload: Dict[str, Any]) -> str:
+        """Generate request signature using SHA256."""
+        if not self._api_secret:
+            return ""
+        data = json.dumps(payload, separators=(",", ":"), sort_keys=True)
+        return hashlib.sha256((data + self._api_secret).encode()).hexdigest()
+
+    # -----------------------------------------------------------
+    def _private(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Perform authenticated POST request to Crypto.com API."""
+        if not self._api_key or not self._api_secret:
+            return {}
+        url = "https://api.crypto.com/v2/" + method
+        nonce = int(time.time() * 1000)
+        payload = {
+            "id": nonce,
+            "method": method,
+            "api_key": self._api_key,
+            "params": params,
+            "nonce": nonce,
+        }
+        payload["sig"] = self._sign(payload)
+        try:
+            r = requests.post(url, json=payload, timeout=10)
+            r.raise_for_status()
+            return r.json()
+        except Exception:
+            return {}
+
+    # -----------------------------------------------------------
+    def update_balances(self) -> Dict[str, float]:
+        """Fetch account balances; cached for TTL period."""
+        now = time.time()
+        if now - self._last_update < self._ttl and self._cache:
+            return self._cache
+        balances: Dict[str, float] = {}
+        try:
+            data = self._private("private/get-account-summary", {})
+            if data and data.get("result"):
+                for acc in data["result"].get("accounts", []):
+                    c = str(acc.get("currency", "")).upper()
+                    if c:
+                        balances[c] = float(acc.get("available", 0.0))
+        except Exception:
+            pass
+        self._cache = balances
+        self._last_update = now
+        return balances

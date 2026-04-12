@@ -1,0 +1,139 @@
+# ============================================================================
+# VirtualMiner / VHW
+# ASCII-ONLY SOURCE FILE
+# File: live.py
+#
+# Purpose
+# -------
+#   Live telemetry bridge between Monitor (smoothed utilization metrics)
+#   and upper-layer systems (MinerEngine, TelemetryConsole, Murphy Watchdog).
+#
+# v4.8.1 Update Summary
+# ---------------------
+#   - Field alignment: reads canonical Monitor output fields:
+#       global_util, gpu_util, gpu_mem_util, mem_bw_util, cpu_util,
+#       util_cap, group_headroom, target_util, alert
+#   - Restored pulse / anti-pulse tracking loop and harmonic bias feedback.
+#   - Eliminated all *_ema legacy keys.
+#   - ASCII only; no UTF-8 or Unicode characters.
+#
+# Public Surface
+# --------------
+# class LiveTelemetry:
+#   .tick()     -> produce one telemetry frame (dict)
+#   .read_raw() -> last raw Monitor output
+#   .pulse()    -> harmonic pulse value for internal rhythm control
+#
+# Notes
+# -----
+#   This module does not perform smoothing itself. All EMA filtering
+#   is handled inside monitor.py.
+# ============================================================================
+
+from __future__ import annotations
+from typing import Dict, Any, Optional, Callable
+import time
+import math
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from VHW.monitor import Monitor
+from core.utils import append_telemetry
+
+# ---------------------------------------------------------------------------
+# Helpers (ASCII only)
+# ---------------------------------------------------------------------------
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _now_iso() -> str:
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+
+# ---------------------------------------------------------------------------
+# Live Telemetry
+# ---------------------------------------------------------------------------
+
+class LiveTelemetry:
+    """
+    Consumes smoothed frames from Monitor and re-emits harmonized telemetry
+    data for other modules. Maintains internal phase rhythm to provide
+    stable real-time feedback (pulse / anti-pulse).
+    """
+
+    def __init__(self, monitor_reader: Callable[[], Dict[str, Any]]) -> None:
+        self._reader = monitor_reader
+        self._lock = threading.RLock()
+        self._last: Dict[str, Any] = {}
+        self._pulse_state = 0.0
+        self._phase_rate = 0.25  # radians per tick (for synthetic pulse)
+        self._last_pulse_ts = time.time()
+
+    # -----------------------------------------------------------------------
+    # Core methods
+    # -----------------------------------------------------------------------
+
+    def tick(self) -> Dict[str, Any]:
+        """
+        Produce one telemetry snapshot by reading from the Monitor.
+        Adds synthetic pulse / anti-pulse signal for synchronization.
+        """
+        with self._lock:
+            frame = {}
+            try:
+                frame = self._reader() or {}
+            except Exception:
+                frame = {}
+
+            # extract canonical fields
+            global_util = float(frame.get("global_util", 0.0))
+            gpu_util    = float(frame.get("gpu_util", 0.0))
+            gpu_mem_util = float(frame.get("gpu_mem_util", 0.0))
+            mem_bw_util = float(frame.get("mem_bw_util", 0.0))
+            cpu_util    = float(frame.get("cpu_util", 0.0))
+            util_cap    = float(frame.get("util_cap", 0.75))
+            headroom    = float(frame.get("group_headroom", 0.10))
+            target_util = float(frame.get("target_util", max(0.0, util_cap - headroom)))
+            alert       = bool(frame.get("alert", False))
+            ts          = str(frame.get("timestamp", _now_iso()))
+
+            # harmonic pulse generation (cosine wave based)
+            now_t = time.time()
+            dt = now_t - self._last_pulse_ts
+            self._last_pulse_ts = now_t
+            self._pulse_state += self._phase_rate * dt * 2.0 * math.pi
+            pulse = math.cos(self._pulse_state)
+            anti_pulse = -pulse
+
+            # build structured live frame
+            live_frame = {
+                "timestamp": ts,
+                "global_util": global_util,
+                "gpu_util": gpu_util,
+                "gpu_mem_util": gpu_mem_util,
+                "mem_bw_util": mem_bw_util,
+                "cpu_util": cpu_util,
+                "util_cap": util_cap,
+                "group_headroom": headroom,
+                "target_util": target_util,
+                "alert": alert,
+                "pulse": pulse,
+                "anti_pulse": anti_pulse
+            }
+
+            self._last = dict(live_frame)
+            return live_frame
+
+    def read_raw(self) -> Dict[str, Any]:
+        """Return last Monitor frame captured."""
+        with self._lock:
+            return dict(self._last)
+
+    def pulse(self) -> float:
+        """Return current harmonic pulse value."""
+        with self._lock:
+            return float(self._last.get("pulse", 0.0))
+
+# End of file

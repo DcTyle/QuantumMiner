@@ -1,0 +1,146 @@
+# ============================================================================
+# VirtualMiner / VHW
+# File: share_allocator.py
+# Version: v4.8.3 (prefix-filter optimization)
+# ASCII-ONLY SOURCE FILE
+# ============================================================================
+"""
+Purpose
+-------
+Allocates shares and handles nonce submission for each active mining lane.
+Now includes optional prefix-based pre-target filtering to skip obviously
+invalid nonces before full hashing, improving efficiency while preserving
+accuracy.
+
+Patch Notes (v4.8.3)
+--------------------
+- Added should_hash() to perform prefix test against target.
+- Updated register_nonce_result() to skip unpromising nonces.
+- Telemetry now tracks skipped_nonce_count.
+"""
+
+from __future__ import annotations
+import time
+import hashlib
+from typing import Any, Dict, Optional
+
+# Safe import for VSD interface
+try:
+    from core.utils import sha256_str
+except Exception:
+    def sha256_str(s: str) -> str:
+        return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+
+class ShareAllocator:
+    """Distributes shares to active lanes and records nonce results."""
+
+    def __init__(self, vsd: Any = None):
+        self.vsd = vsd
+        self.on_submit = None
+        self._lock_ts = 0.0
+
+    # ----------------------------------------------------------------------
+    # Prefix-filter pre-target test
+    # ----------------------------------------------------------------------
+    def should_hash(self, header_hex: str, nonce_hex: str, difficulty: float) -> bool:
+        """
+        Lightweight prefix-filter to discard nonces that cannot reach target.
+        Returns False if the prefix test shows hash is certainly above target.
+        """
+        try:
+            if difficulty <= 0:
+                return True
+            target = int((2 ** 256) / max(1.0, difficulty))
+            prefix_cutoff = target >> (256 - 24)  # 24-bit prefix check
+            prefix = int.from_bytes(
+                hashlib.sha256(bytes.fromhex(header_hex + nonce_hex)).digest()[:3],
+                "big"
+            )
+            return prefix <= prefix_cutoff
+        except Exception:
+            return True  # Fallback: never skip
+
+    # ----------------------------------------------------------------------
+    def register_nonce_result(
+        self,
+        lane_id: str,
+        network: str,
+        header_hex: str,
+        nonce_hex: str,
+        is_valid: bool,
+        payload: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Called by lanes when a nonce result is found.  Performs optional prefix
+        filter skip, updates telemetry, and returns minimal JSON result.
+        """
+        payload = payload or {}
+        difficulty = float(payload.get("difficulty", 0.0))
+
+        # --- Prefix filter pre-check -------------------------------------
+        if not self.should_hash(header_hex, nonce_hex, difficulty):
+            try:
+                path = "telemetry/metrics/skipped_nonce_count"
+                val = int(self.vsd.get(path, 0)) if self.vsd else 0
+                if self.vsd:
+                    self.vsd.store(path, val + 1)
+            except Exception:
+                pass
+            return {
+                "ok": False,
+                "skipped": True,
+                "reason": "above target prefix",
+                "lane_id": lane_id,
+                "network": network.upper(),
+            }
+        # -----------------------------------------------------------------
+
+        ts = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        result = {
+            "timestamp": ts,
+            "lane_id": lane_id,
+            "network": network.upper(),
+            "header_hex": header_hex,
+            "nonce_hex": nonce_hex,
+            "is_valid": bool(is_valid),
+        }
+
+        # Log basic telemetry
+        try:
+            if self.vsd:
+                arr = self.vsd.get("telemetry/metrics/share_log", [])
+                arr.append(result)
+                if len(arr) > 1000:
+                    arr = arr[-1000:]
+                self.vsd.store("telemetry/metrics/share_log", arr)
+        except Exception:
+            pass
+
+        # Callback hook
+        if callable(self.on_submit):
+            try:
+                return self.on_submit(result) or result
+            except Exception:
+                pass
+
+        return result
+
+    # ----------------------------------------------------------------------
+    def counters(self) -> Dict[str, Any]:
+        """Return rolling statistics from telemetry log."""
+        try:
+            arr = self.vsd.get("telemetry/metrics/share_log", []) if self.vsd else []
+            total = len(arr)
+            valids = sum(1 for x in arr if x.get("is_valid"))
+            skipped = int(self.vsd.get("telemetry/metrics/skipped_nonce_count", 0))
+            return {
+                "total": total,
+                "valid": valids,
+                "skipped": skipped,
+                "valid_ratio": (valids / total) if total > 0 else 0.0,
+            }
+        except Exception:
+            return {"total": 0, "valid": 0, "skipped": 0, "valid_ratio": 0.0}
+
+# End of file

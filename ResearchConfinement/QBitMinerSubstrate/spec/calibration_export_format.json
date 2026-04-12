@@ -1,0 +1,49 @@
+{
+  "name": "quantum_miner_calibration_export_bundle",
+  "version": 1,
+  "bundle_root_files": [
+    "manifest.json",
+    "traces.jsonl"
+  ],
+  "trace_directory_files": [
+    "trace.json",
+    "calibration_plan.json"
+  ],
+  "sweep_directory": "sweeps",
+  "sweep_filename_pattern": "NN_variable_direction.json",
+  "manifest_required_fields": [
+    "export_format",
+    "trace_count",
+    "sweep_file_count",
+    "trace_ids",
+    "source_identities"
+  ],
+  "plan_required_fields": [
+    "trace_id",
+    "source_identity",
+    "gpu_device_id",
+    "trajectory_9d",
+    "encodable_node_count",
+    "request_time_ms",
+    "response_time_ms",
+    "accounting_time_ms",
+    "next_feedback_time_ms",
+    "closed_loop_latency_ms",
+    "encode_deadline_ms",
+    "calibration_plan"
+  ],
+  "sweep_required_fields": [
+    "trace_id",
+    "source_identity",
+    "gpu_device_id",
+    "sweep_index",
+    "variable",
+    "direction",
+    "wavelength_step",
+    "predicted_zero_point_overlap",
+    "predicted_constant_phase_alignment",
+    "trajectory_conservation_score",
+    "reverse_causal_flux_coherence",
+    "temporal_dynamics_noise"
+  ]
+}

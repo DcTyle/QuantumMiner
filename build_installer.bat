@@ -1,0 +1,1 @@
+pyinstaller --clean --noconfirm quantum_application.spec

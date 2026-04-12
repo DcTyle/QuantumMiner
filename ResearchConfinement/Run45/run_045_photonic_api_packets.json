@@ -1,0 +1,1098 @@
+[
+  {
+    "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 0,
+      "timestamp": 1775711340.5407481,
+      "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae",
+      "spectra_sig9": [
+        765154,
+        544145,
+        619565,
+        659171,
+        10000,
+        348532,
+        528373,
+        625942,
+        431534
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6608587337055515,
+        "amperage_norm": 0.050050384615384615,
+        "voltage_norm": 0.4376676376975857
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.785928099998273,
+        "accounting_latency_s": 0.813396842722918,
+        "closed_loop_latency_s": 0.8239643097340423
+      },
+      "encoding_words": {
+        "axis_word": 3280707234,
+        "spin_word": 760155701,
+        "inertia_word": 1520445187,
+        "constants_word": 2746527125,
+        "derived_temporal_constants": {
+          "sent_signal": 0.6398500549922461,
+          "feedback_gate": 0.705625794750042,
+          "kernel_control_gate": 0.6775178338589287,
+          "response_energy": 0.5852430146881524,
+          "transport_coherence": 0.6734780486233175,
+          "load_hint": 0.6388460793623657,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.11834445228040263,
+              "phase_ring": 0.15907451522188348,
+              "phase_ring_stability": 0.2305316762802566,
+              "temporal_relativity": 0.22887999224536848,
+              "zero_point": 0.26316936397208884
+            },
+            "feedback_gate": {
+              "coherence": 0.20746455888638324,
+              "overlap": 0.20299018780628336,
+              "nonlocal_coupling": 0.20015453591105706,
+              "phase_ring_stability": 0.19539533050481991,
+              "temporal_relativity": 0.19399538689145654
+            },
+            "kernel_control_gate": {
+              "coherence": 0.18384475168984363,
+              "inertia": 0.15731185733893477,
+              "phase_ring": 0.1194789783789775,
+              "zero_point": 0.19766338249827273,
+              "temporal_relativity": 0.17190904279495142,
+              "interception": 0.16979198729901998
+            },
+            "response_energy": {
+              "vector_energy": 0.1384007031173472,
+              "spin": 0.0814899551875593,
+              "inertia": 0.24494070251281902,
+              "observer_feedback": 0.2707958871622886,
+              "interception": 0.2643727520199859,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.1890655004360231,
+              "overlap": 0.18498794033642638,
+              "phase_ring_stability": 0.17806663529932004,
+              "nonlocal_coupling": 0.18240376910491055,
+              "temporal_relativity": 0.17679084611747858,
+              "noise_inverse": 0.08868530870584149
+            },
+            "load_hint": {
+              "vector_energy": 0.09727284236943032,
+              "coherence": 0.20118891415886117,
+              "overlap": 0.19684988939250533,
+              "phase_ring": 0.13075078675854573,
+              "temporal_relativity": 0.18812717434737716,
+              "interception": 0.18581039297328028
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 0,
+      "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae",
+      "transport": {
+        "phase_transport_term": 0.1521271362322555,
+        "flux_transport_term": 0.3485320686473511,
+        "phase_correction_norm": 0.41631381151036256,
+        "flux_correction_norm": 0.16437701175986175
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7651539118205957,
+        "axis_scale_y": 0.5441451360576947,
+        "axis_scale_z": 0.6195653194790745,
+        "vector_energy": 0.3536805799516597,
+        "temporal_coupling_moment": 0.6343759859775727,
+        "inertial_mass_proxy": 0.6259416879193762,
+        "spin_momentum_score": 0.2082461574384751
+      },
+      "observer": {
+        "dispatch_norm": 0.6106550000000001,
+        "latency_norm": 0.6482834399986184,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5283733505562141
+      },
+      "disruption_node_ids": [
+        "PNODE-00-37f997d8",
+        "PNODE-00-a7e8d549",
+        "PNODE-00-25463d2a",
+        "PNODE-00-3dd78961"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 1,
+      "timestamp": 1775711341.3705287,
+      "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6",
+      "spectra_sig9": [
+        754529,
+        580909,
+        624831,
+        1000000,
+        20000,
+        372598,
+        507848,
+        631040,
+        446902
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6604676649318318,
+        "amperage_norm": 0.17366636154030077,
+        "voltage_norm": 0.43701603263605276
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.829770100011956,
+        "accounting_latency_s": 1.0074255225272153,
+        "closed_loop_latency_s": 1.4288228306233077
+      },
+      "encoding_words": {
+        "axis_word": 3230965674,
+        "spin_word": 759762226,
+        "inertia_word": 1520510981,
+        "constants_word": 2746657942,
+        "derived_temporal_constants": {
+          "sent_signal": 0.638191688006718,
+          "feedback_gate": 0.7134014257446464,
+          "kernel_control_gate": 0.6750055759101271,
+          "response_energy": 0.5867492716726765,
+          "transport_coherence": 0.6808930480886909,
+          "load_hint": 0.6407066941928028,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.11828071223839438,
+              "phase_ring": 0.1574613715375601,
+              "phase_ring_stability": 0.23751275319989396,
+              "temporal_relativity": 0.2276883284387493,
+              "zero_point": 0.2590568345854023
+            },
+            "feedback_gate": {
+              "coherence": 0.20801590007549492,
+              "overlap": 0.2033550073599577,
+              "nonlocal_coupling": 0.19963725051558123,
+              "phase_ring_stability": 0.19860341478981106,
+              "temporal_relativity": 0.19038842725915509
+            },
+            "kernel_control_gate": {
+              "coherence": 0.1870265008834447,
+              "inertia": 0.1591945867524287,
+              "phase_ring": 0.11838056919801858,
+              "zero_point": 0.19476075454824573,
+              "temporal_relativity": 0.17117769048452047,
+              "interception": 0.16945989813334172
+            },
+            "response_energy": {
+              "vector_energy": 0.13852659018967417,
+              "spin": 0.07693041909926884,
+              "inertia": 0.24799396673326177,
+              "observer_feedback": 0.27256371393922557,
+              "interception": 0.2639853100385697,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.1902035923704137,
+              "overlap": 0.18594180979597336,
+              "phase_ring_stability": 0.18159709395456672,
+              "nonlocal_coupling": 0.18254240279341508,
+              "temporal_relativity": 0.17408555210107457,
+              "noise_inverse": 0.08562954898455659
+            },
+            "load_hint": {
+              "vector_energy": 0.09688799805551888,
+              "coherence": 0.20377589354869563,
+              "overlap": 0.19921000422245422,
+              "phase_ring": 0.12898228942519221,
+              "temporal_relativity": 0.18650772307301883,
+              "interception": 0.1846360916751202
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 1,
+      "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6",
+      "transport": {
+        "phase_transport_term": 0.18563036016004902,
+        "flux_transport_term": 0.37259787204909434,
+        "phase_correction_norm": 0.43955449414006387,
+        "flux_correction_norm": 0.18337468808336901
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7545293106169633,
+        "axis_scale_y": 0.5809090669970608,
+        "axis_scale_z": 0.6248314173308882,
+        "vector_energy": 0.35249157914088086,
+        "temporal_coupling_moment": 0.6661601798273512,
+        "inertial_mass_proxy": 0.6310397507909966,
+        "spin_momentum_score": 0.1957553771816755
+      },
+      "observer": {
+        "dispatch_norm": 0.5906225,
+        "latency_norm": 0.6774487999959421,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5078482679600297
+      },
+      "disruption_node_ids": [
+        "PNODE-01-4b7c5862",
+        "PNODE-01-a17cc99f",
+        "PNODE-01-ac1d65bc",
+        "PNODE-01-3d7077b8"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 2,
+      "timestamp": 1775711342.2062955,
+      "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454",
+      "spectra_sig9": [
+        740751,
+        576195,
+        621493,
+        1000000,
+        30000,
+        371029,
+        514812,
+        621465,
+        443476
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6598154618098461,
+        "amperage_norm": 0.1767546999973747,
+        "voltage_norm": 0.4359291975620763
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.8361492999829352,
+        "accounting_latency_s": 1.0149693107553737,
+        "closed_loop_latency_s": 1.4454289677535623
+      },
+      "encoding_words": {
+        "axis_word": 3180568234,
+        "spin_word": 742788400,
+        "inertia_word": 1503536904,
+        "constants_word": 2679416979,
+        "derived_temporal_constants": {
+          "sent_signal": 0.6245042583428954,
+          "feedback_gate": 0.7046359118329153,
+          "kernel_control_gate": 0.6582219475514752,
+          "response_energy": 0.5759416652978374,
+          "transport_coherence": 0.6725103897624652,
+          "load_hint": 0.6280254280072575,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.11997285956093778,
+              "phase_ring": 0.15302826539940245,
+              "phase_ring_stability": 0.2432705201092051,
+              "temporal_relativity": 0.22687083522975557,
+              "zero_point": 0.2568575197006991
+            },
+            "feedback_gate": {
+              "coherence": 0.20658155666639005,
+              "overlap": 0.20468714938778024,
+              "nonlocal_coupling": 0.1996864749013901,
+              "phase_ring_stability": 0.20130782880501324,
+              "temporal_relativity": 0.18773699023942633
+            },
+            "kernel_control_gate": {
+              "coherence": 0.18839106032218536,
+              "inertia": 0.16103584437455698,
+              "phase_ring": 0.11548127799488384,
+              "zero_point": 0.1938350053188841,
+              "temporal_relativity": 0.1712058483033762,
+              "interception": 0.17005096368611344
+            },
+            "response_energy": {
+              "vector_energy": 0.13990581619535836,
+              "spin": 0.07586245545054063,
+              "inertia": 0.2488487066324162,
+              "observer_feedback": 0.2726032503034699,
+              "interception": 0.2627797714182149,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.18844043103640717,
+              "overlap": 0.18671238265735352,
+              "phase_ring_stability": 0.18362981983082205,
+              "nonlocal_coupling": 0.18215084642491097,
+              "temporal_relativity": 0.17125071537400702,
+              "noise_inverse": 0.08781580467649916
+            },
+            "load_hint": {
+              "vector_energy": 0.09816057490903837,
+              "coherence": 0.20425582347210594,
+              "overlap": 0.2023827437793777,
+              "phase_ring": 0.12520617216186683,
+              "temporal_relativity": 0.18562341264304905,
+              "interception": 0.18437127303456202
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 2,
+      "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454",
+      "transport": {
+        "phase_transport_term": 0.1842966450795131,
+        "flux_transport_term": 0.37102929523464834,
+        "phase_correction_norm": 0.44170262329833954,
+        "flux_correction_norm": 0.1800189778592155
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.740750890815532,
+        "axis_scale_y": 0.5761953207862545,
+        "axis_scale_z": 0.6214932127371716,
+        "vector_energy": 0.3493952381657676,
+        "temporal_coupling_moment": 0.6666631472309958,
+        "inertial_mass_proxy": 0.6214648932083563,
+        "spin_momentum_score": 0.1894558883311169
+      },
+      "observer": {
+        "dispatch_norm": 0.6180125000000001,
+        "latency_norm": 0.6776392000104801,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5148119564376529
+      },
+      "disruption_node_ids": [
+        "PNODE-02-54330be7",
+        "PNODE-02-8e565205",
+        "PNODE-02-c2767331",
+        "PNODE-02-48468fa3"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 3,
+      "timestamp": 1775711342.9722455,
+      "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac",
+      "spectra_sig9": [
+        728222,
+        568845,
+        617710,
+        1000000,
+        40000,
+        368504,
+        506515,
+        611222,
+        444844
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6589046983469088,
+        "amperage_norm": 0.16604170769272353,
+        "voltage_norm": 0.43441142181984754
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.7655986000027042,
+        "accounting_latency_s": 0.9306771450758144,
+        "closed_loop_latency_s": 1.318463975368228
+      },
+      "encoding_words": {
+        "axis_word": 3130105513,
+        "spin_word": 725879855,
+        "inertia_word": 1486628618,
+        "constants_word": 2628887440,
+        "derived_temporal_constants": {
+          "sent_signal": 0.6113818996121837,
+          "feedback_gate": 0.6952783542521841,
+          "kernel_control_gate": 0.6411158818582025,
+          "response_energy": 0.5647356780078782,
+          "transport_coherence": 0.6636108157591937,
+          "load_hint": 0.61467952544551,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.12142115510557636,
+              "phase_ring": 0.14851930721294695,
+              "phase_ring_stability": 0.24914798165808252,
+              "temporal_relativity": 0.2259590144771017,
+              "zero_point": 0.2549525415462925
+            },
+            "feedback_gate": {
+              "coherence": 0.20469744741577248,
+              "overlap": 0.20602535292318694,
+              "nonlocal_coupling": 0.19995239868061424,
+              "phase_ring_stability": 0.20416346036316463,
+              "temporal_relativity": 0.18516134061726172
+            },
+            "kernel_control_gate": {
+              "coherence": 0.18937228570191952,
+              "inertia": 0.16289820383219855,
+              "phase_ring": 0.1125920051220964,
+              "zero_point": 0.19327869488721455,
+              "temporal_relativity": 0.17129879604752082,
+              "interception": 0.1705600144090501
+            },
+            "response_energy": {
+              "vector_energy": 0.14104922578895476,
+              "spin": 0.0750590751637507,
+              "inertia": 0.24961346188706052,
+              "observer_feedback": 0.2729243691949034,
+              "interception": 0.26135386796533056,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.18620231354377131,
+              "overlap": 0.18741023812109087,
+              "phase_ring_stability": 0.18571657409829576,
+              "nonlocal_coupling": 0.18188599664036703,
+              "temporal_relativity": 0.168431362662629,
+              "noise_inverse": 0.09035351493384597
+            },
+            "load_hint": {
+              "vector_energy": 0.09935421522866278,
+              "coherence": 0.20440133107454042,
+              "overlap": 0.20572731562727117,
+              "phase_ring": 0.12152758060666266,
+              "temporal_relativity": 0.18489348530488042,
+              "interception": 0.18409607215798238
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 3,
+      "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac",
+      "transport": {
+        "phase_transport_term": 0.18323537304354365,
+        "flux_transport_term": 0.3685042221885285,
+        "phase_correction_norm": 0.43649264799875104,
+        "flux_correction_norm": 0.18185147194661852
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7282215353099801,
+        "axis_scale_y": 0.5688451270541264,
+        "axis_scale_z": 0.6177096489870921,
+        "vector_energy": 0.34538356549231364,
+        "temporal_coupling_moment": 0.663541829032642,
+        "inertial_mass_proxy": 0.6112219828163268,
+        "spin_momentum_score": 0.18379520240260577
+      },
+      "observer": {
+        "dispatch_norm": 0.619845,
+        "latency_norm": 0.6229551200091028,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5065145499104148
+      },
+      "disruption_node_ids": [
+        "PNODE-03-8186723e",
+        "PNODE-03-36edb413",
+        "PNODE-03-405a98c5",
+        "PNODE-03-4b6081a6"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 4,
+      "timestamp": 1775711343.7521584,
+      "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329",
+      "spectra_sig9": [
+        718264,
+        569229,
+        615643,
+        1000000,
+        50000,
+        365905,
+        518996,
+        604194,
+        439081
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6577389688764105,
+        "amperage_norm": 0.1715426923098803,
+        "voltage_norm": 0.4324686953183502
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.7798950000142213,
+        "accounting_latency_s": 0.9475250818391254,
+        "closed_loop_latency_s": 1.3522878256391242
+      },
+      "encoding_words": {
+        "axis_word": 3079773609,
+        "spin_word": 692128813,
+        "inertia_word": 1469720333,
+        "constants_word": 2578489486,
+        "derived_temporal_constants": {
+          "sent_signal": 0.6005277789731658,
+          "feedback_gate": 0.6886136720180092,
+          "kernel_control_gate": 0.6275027992493044,
+          "response_energy": 0.556261536469669,
+          "transport_coherence": 0.6572855419666845,
+          "load_hint": 0.604512550318183,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.12229895262679817,
+              "phase_ring": 0.14483796193458942,
+              "phase_ring_stability": 0.2546541391592741,
+              "temporal_relativity": 0.22470888475007073,
+              "zero_point": 0.25350006152926746
+            },
+            "feedback_gate": {
+              "coherence": 0.20362202282104552,
+              "overlap": 0.20750255275557725,
+              "nonlocal_coupling": 0.2001422284563524,
+              "phase_ring_stability": 0.20650845485390876,
+              "temporal_relativity": 0.18222474111311612
+            },
+            "kernel_control_gate": {
+              "coherence": 0.19082952544493456,
+              "inertia": 0.1648085125804443,
+              "phase_ring": 0.11007541347581348,
+              "zero_point": 0.19265753063813557,
+              "temporal_relativity": 0.17077652205382138,
+              "interception": 0.17085249580685072
+            },
+            "response_energy": {
+              "vector_energy": 0.14153186416687374,
+              "spin": 0.07360141056289266,
+              "inertia": 0.2509592505019112,
+              "observer_feedback": 0.2737448556005802,
+              "interception": 0.2601626191677422,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.1848985031555156,
+              "overlap": 0.18842220931659065,
+              "phase_ring_stability": 0.18751952103434094,
+              "nonlocal_coupling": 0.1817386839944702,
+              "temporal_relativity": 0.16546875138023692,
+              "noise_inverse": 0.09195233111884576
+            },
+            "load_hint": {
+              "vector_energy": 0.09994770580154717,
+              "coherence": 0.20520490710892852,
+              "overlap": 0.20911560288592132,
+              "phase_ring": 0.11836750599581176,
+              "temporal_relativity": 0.1836412906374522,
+              "interception": 0.183722987570339
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 4,
+      "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329",
+      "transport": {
+        "phase_transport_term": 0.18094677081187954,
+        "flux_transport_term": 0.36590516517437544,
+        "phase_correction_norm": 0.44044500056884556,
+        "flux_correction_norm": 0.1760016799310141
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7182641223574971,
+        "axis_scale_y": 0.569228806002687,
+        "axis_scale_z": 0.615643006631948,
+        "vector_energy": 0.34074353999727586,
+        "temporal_coupling_moment": 0.6646817801340745,
+        "inertial_mass_proxy": 0.6041942845482497,
+        "spin_momentum_score": 0.17719829616900398
+      },
+      "observer": {
+        "dispatch_norm": 0.662765,
+        "latency_norm": 0.6315293599846471,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.518996459513932
+      },
+      "disruption_node_ids": [
+        "PNODE-04-73bbb6a6",
+        "PNODE-04-a54712d5",
+        "PNODE-04-f4b836e6",
+        "PNODE-04-7b5d2b3a"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 5,
+      "timestamp": 1775711344.5689735,
+      "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8",
+      "spectra_sig9": [
+        710326,
+        573244,
+        614586,
+        1000000,
+        60000,
+        365196,
+        516014,
+        599101,
+        441528
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6563228739906166,
+        "amperage_norm": 0.17532490768858583,
+        "voltage_norm": 0.43010868509536104
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.8168043999758083,
+        "accounting_latency_s": 0.9912757586097345,
+        "closed_loop_latency_s": 1.4127579807814388
+      },
+      "encoding_words": {
+        "axis_word": 3046284714,
+        "spin_word": 675220524,
+        "inertia_word": 1452877583,
+        "constants_word": 2544803212,
+        "derived_temporal_constants": {
+          "sent_signal": 0.5920537229914022,
+          "feedback_gate": 0.6840566555104396,
+          "kernel_control_gate": 0.616317675338501,
+          "response_energy": 0.5495750698371789,
+          "transport_coherence": 0.652958636262342,
+          "load_hint": 0.5963236417572052,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.12256087879732468,
+              "phase_ring": 0.14159855225100018,
+              "phase_ring_stability": 0.2601067466909181,
+              "temporal_relativity": 0.22341957205642782,
+              "zero_point": 0.2523142502043291
+            },
+            "feedback_gate": {
+              "coherence": 0.20270550714496852,
+              "overlap": 0.2088055288107574,
+              "nonlocal_coupling": 0.200401559184579,
+              "phase_ring_stability": 0.20876661392763238,
+              "temporal_relativity": 0.17932079093206266
+            },
+            "kernel_control_gate": {
+              "coherence": 0.1923188075034858,
+              "inertia": 0.16667561195096528,
+              "phase_ring": 0.10782623788719958,
+              "zero_point": 0.19213541333838188,
+              "temporal_relativity": 0.17013233216190987,
+              "interception": 0.17091159715805762
+            },
+            "response_energy": {
+              "vector_energy": 0.14141221669000625,
+              "spin": 0.07205300558310689,
+              "inertia": 0.25254657459116425,
+              "observer_feedback": 0.2750232717042982,
+              "interception": 0.2589649314314244,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.1838544788174934,
+              "overlap": 0.18938721603778488,
+              "phase_ring_stability": 0.18935192012670696,
+              "nonlocal_coupling": 0.1817647913815368,
+              "temporal_relativity": 0.16264447385919686,
+              "noise_inverse": 0.0929971197772812
+            },
+            "load_hint": {
+              "vector_energy": 0.10007157130831025,
+              "coherence": 0.20621249195833533,
+              "overlap": 0.2124180494018366,
+              "phase_ring": 0.11561592702163923,
+              "temporal_relativity": 0.1824231994427003,
+              "interception": 0.18325876086717835
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 5,
+      "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8",
+      "transport": {
+        "phase_transport_term": 0.18235303169074202,
+        "flux_transport_term": 0.36519589342300707,
+        "phase_correction_norm": 0.4403598581624087,
+        "flux_correction_norm": 0.17674982641789694
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7103256707701804,
+        "axis_scale_y": 0.5732444577801883,
+        "axis_scale_z": 0.6145855460932611,
+        "vector_energy": 0.3354634197756384,
+        "temporal_coupling_moment": 0.6671951875343127,
+        "inertial_mass_proxy": 0.5991005554399359,
+        "spin_momentum_score": 0.1709268705617455
+      },
+      "observer": {
+        "dispatch_norm": 0.638115,
+        "latency_norm": 0.6632675999996218,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5160136529433333
+      },
+      "disruption_node_ids": [
+        "PNODE-05-b7bac3fe",
+        "PNODE-05-de282507",
+        "PNODE-05-ff2a3cf1",
+        "PNODE-05-4b1de750"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 6,
+      "timestamp": 1775711345.3638487,
+      "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730",
+      "spectra_sig9": [
+        703723,
+        574778,
+        612951,
+        1000000,
+        70000,
+        361242,
+        525204,
+        593402,
+        436016
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6546620023883345,
+        "amperage_norm": 0.17556150000291784,
+        "voltage_norm": 0.4273407050662244
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.7948785000189673,
+        "accounting_latency_s": 0.964807956184071,
+        "closed_loop_latency_s": 1.3822816093140373
+      },
+      "encoding_words": {
+        "axis_word": 3012795562,
+        "spin_word": 658246698,
+        "inertia_word": 1419191826,
+        "constants_word": 2511182474,
+        "derived_temporal_constants": {
+          "sent_signal": 0.583591114936862,
+          "feedback_gate": 0.67860557869631,
+          "kernel_control_gate": 0.6047952440968987,
+          "response_energy": 0.5425692310775321,
+          "transport_coherence": 0.6478051678660621,
+          "load_hint": 0.587448262838562,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.12255166621021236,
+              "phase_ring": 0.13836898957333965,
+              "phase_ring_stability": 0.2654206900147878,
+              "temporal_relativity": 0.22200459153321822,
+              "zero_point": 0.2516540626684421
+            },
+            "feedback_gate": {
+              "coherence": 0.2015439542860959,
+              "overlap": 0.21020567407904306,
+              "nonlocal_coupling": 0.20080935394823757,
+              "phase_ring_stability": 0.21097564313410996,
+              "temporal_relativity": 0.1764653745525135
+            },
+            "kernel_control_gate": {
+              "coherence": 0.19348674400310115,
+              "inertia": 0.16855300731965422,
+              "phase_ring": 0.10558877620453387,
+              "zero_point": 0.19203612446686263,
+              "temporal_relativity": 0.16941074155459818,
+              "interception": 0.17092460645124993
+            },
+            "response_energy": {
+              "vector_energy": 0.1410400859085686,
+              "spin": 0.07036498097415961,
+              "inertia": 0.2542031116390652,
+              "observer_feedback": 0.2766119841052075,
+              "interception": 0.257779837372999,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.18251318518422754,
+              "overlap": 0.1903570228928991,
+              "phase_ring_stability": 0.19105428769169366,
+              "nonlocal_coupling": 0.18184794941481514,
+              "temporal_relativity": 0.15980264800495125,
+              "noise_inverse": 0.09442490681141327
+            },
+            "load_hint": {
+              "vector_energy": 0.10004865022350123,
+              "coherence": 0.20699709144365774,
+              "overlap": 0.21589316977253134,
+              "phase_ring": 0.11296158646963173,
+              "temporal_relativity": 0.1812399652585656,
+              "interception": 0.18285953683211248
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 6,
+      "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730",
+      "transport": {
+        "phase_transport_term": 0.17930760004416113,
+        "flux_transport_term": 0.36124249319645596,
+        "phase_correction_norm": 0.44190977957223027,
+        "flux_correction_norm": 0.17151636109336993
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.7037233322327238,
+        "axis_scale_y": 0.5747782871135877,
+        "axis_scale_z": 0.612951338336783,
+        "vector_energy": 0.32923834875331454,
+        "temporal_coupling_moment": 0.6666366686683872,
+        "inertial_mass_proxy": 0.5934016005793973,
+        "spin_momentum_score": 0.16425720387754847
+      },
+      "observer": {
+        "dispatch_norm": 0.6850425,
+        "latency_norm": 0.6429500800054153,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5252043590561383
+      },
+      "disruption_node_ids": [
+        "PNODE-06-f3f44a75",
+        "PNODE-06-a64aba26",
+        "PNODE-06-c50f809f",
+        "PNODE-06-721e7767"
+      ]
+    }
+  },
+  {
+    "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8",
+    "request": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.request",
+      "frame_index": 7,
+      "timestamp": 1775711346.158726,
+      "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8",
+      "spectra_sig9": [
+        699200,
+        579742,
+        612398,
+        1000000,
+        80000,
+        360233,
+        508713,
+        589558,
+        443592
+      ],
+      "quartet": {
+        "frequency_norm": 1.0,
+        "amplitude_norm": 0.6527629087788578,
+        "amperage_norm": 0.17112873076618013,
+        "voltage_norm": 0.4241756791970959
+      },
+      "operator_pipeline": {
+        "current_state_binding": "EwState",
+        "inputs_binding": "EwInputs",
+        "ctx_binding": "EwCtx",
+        "candidate_next_state_operator": "evolve_state(current_state, inputs, ctx)",
+        "ledger_delta_operator": "compute_ledger_delta(current_state, candidate_next_state, ctx)",
+        "accept_operator": "accept_state(current_state, candidate_next_state, ledger_delta, ctx)",
+        "sink_operator": "make_sink_state(current_state, ctx)",
+        "commit_operator": "commit_state(next_state)"
+      },
+      "timing": {
+        "request_to_return_s": 0.7951829999801703,
+        "accounting_latency_s": 0.9649163210616021,
+        "closed_loop_latency_s": 1.369436639140212
+      },
+      "encoding_words": {
+        "axis_word": 2996083882,
+        "spin_word": 641338152,
+        "inertia_word": 1385571860,
+        "constants_word": 2477561993,
+        "derived_temporal_constants": {
+          "sent_signal": 0.5775119194249297,
+          "feedback_gate": 0.6752495250140667,
+          "kernel_control_gate": 0.595732324926884,
+          "response_energy": 0.5373386495064991,
+          "transport_coherence": 0.6446254126027955,
+          "load_hint": 0.5805551029154137,
+          "derived_constants": {
+            "sent_signal": {
+              "vector_energy": 0.12187913639416703,
+              "phase_ring": 0.135598706730833,
+              "phase_ring_stability": 0.2705540547036534,
+              "temporal_relativity": 0.22068406602714666,
+              "zero_point": 0.2512840361441998
+            },
+            "feedback_gate": {
+              "coherence": 0.20052158942792364,
+              "overlap": 0.21137026650942314,
+              "nonlocal_coupling": 0.20126535228081352,
+              "phase_ring_stability": 0.21305733702782587,
+              "temporal_relativity": 0.17378545475401388
+            },
+            "kernel_control_gate": {
+              "coherence": 0.19461668138455496,
+              "inertia": 0.1703152131776321,
+              "phase_ring": 0.10363749790234951,
+              "zero_point": 0.19205528870185593,
+              "temporal_relativity": 0.1686678655082618,
+              "interception": 0.17070745332534557
+            },
+            "response_energy": {
+              "vector_energy": 0.14003796852058023,
+              "spin": 0.06869397046956705,
+              "inertia": 0.2560404043102076,
+              "observer_feedback": 0.27859758500662724,
+              "interception": 0.25663007169301794,
+              "phase_delta": 0.0
+            },
+            "transport_coherence": {
+              "coherence": 0.1814104688268943,
+              "overlap": 0.19122519052903708,
+              "phase_ring_stability": 0.19275147133780496,
+              "nonlocal_coupling": 0.1820833458384107,
+              "temporal_relativity": 0.1572224762040035,
+              "noise_inverse": 0.09530704726384924
+            },
+            "load_hint": {
+              "vector_energy": 0.09952879081921566,
+              "coherence": 0.20794000513492217,
+              "overlap": 0.21919003549060603,
+              "phase_ring": 0.11073244951393622,
+              "temporal_relativity": 0.18021475122464883,
+              "interception": 0.18239396781667105
+            }
+          }
+        }
+      }
+    },
+    "feedback": {
+      "api_version": "photonic_identity.research.v1",
+      "packet_type": "substrate.feedback",
+      "frame_index": 7,
+      "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8",
+      "transport": {
+        "phase_transport_term": 0.1819216722251849,
+        "flux_transport_term": 0.36023290957187737,
+        "phase_correction_norm": 0.43627841657755256,
+        "flux_correction_norm": 0.17697756939731019
+      },
+      "field_dynamics": {
+        "axis_scale_x": 0.6991996767498005,
+        "axis_scale_y": 0.5797416740911348,
+        "axis_scale_z": 0.6123976894250552,
+        "vector_energy": 0.3224513001450468,
+        "temporal_coupling_moment": 0.6674288646838457,
+        "inertial_mass_proxy": 0.5895584042791697,
+        "spin_momentum_score": 0.15817467451180625
+      },
+      "observer": {
+        "dispatch_norm": 0.6268075,
+        "latency_norm": 0.6476312799911017,
+        "field_interference_norm": 0.494565,
+        "observer_damping": 0.5087134887047353
+      },
+      "disruption_node_ids": [
+        "PNODE-07-b1cb3784",
+        "PNODE-07-a7caf22c",
+        "PNODE-07-e3a3cd3b",
+        "PNODE-07-13b88153"
+      ]
+    }
+  }
+]

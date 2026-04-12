@@ -1,0 +1,145 @@
+<!doctype html><html><head><meta charset='utf-8'><title>Photon Frequency Domain Debug</title><style>body{font-family:Segoe UI,Arial,sans-serif;background:#0d1117;color:#e6edf3;margin:0;padding:24px;}svg{background:#111827;border:1px solid #30363d;border-radius:12px;}table{border-collapse:collapse;margin-top:20px;width:100%;}th,td{border:1px solid #30363d;padding:8px;text-align:left;font-size:13px;}th{background:#161b22;} .note{color:#8b949e;}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0;}.card{background:#111827;border:1px solid #30363d;border-radius:12px;padding:12px;}.card h3{margin:0 0 6px 0;font-size:12px;color:#8b949e;text-transform:uppercase;letter-spacing:0.08em;}.card strong{font-size:24px;}.proto-svg{background:#0f172a;border:1px solid #30363d;border-radius:12px;}.proto-node{fill:#132238;stroke:#7ee787;stroke-width:1.6;opacity:0.92;}.proto-ring{fill:none;stroke:#58a6ff;stroke-width:1.2;opacity:0.55;animation:pulse-ring 2.4s ease-in-out infinite;}.proto-edge{stroke:#3b82f6;stroke-width:1.4;stroke-dasharray:8 8;animation:edge-flow 1.2s linear infinite;}.proto-play{fill:#f8fafc;opacity:0.92;}.proto-label{fill:#e6edf3;font-size:12px;font-weight:600;}pre{background:#111827;border:1px solid #30363d;border-radius:12px;padding:14px;overflow:auto;}@keyframes pulse-ring{0%{opacity:0.35;}50%{opacity:0.95;}100%{opacity:0.35;}}@keyframes edge-flow{0%{stroke-dashoffset:16;}100%{stroke-dashoffset:0;}}</style></head><body><h1>Photon Frequency-Domain Debug View</h1><p class='note'>Hover a packet marker to inspect representative bin state and emergent vector curl.</p><svg width='1000' height='700' viewBox='0 0 1000 700'><line x1='80' y1='620' x2='920' y2='620' stroke='#30363d' stroke-width='1' /><line x1='80' y1='620' x2='80' y2='120' stroke='#30363d' stroke-width='1' /><circle cx='300.92' cy='607.87' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 0 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.740, phase 0.201 rad -> vector curl 50.66 deg
+Shared score: 0.995</title></circle><circle cx='380.67' cy='612.02' r='7' fill='#8caf92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 1 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.738, phase 0.150 rad -> vector curl 59.12 deg
+Shared score: 0.992</title></circle><circle cx='138.79' cy='476.02' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 2 (L_smooth)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.694, phase -0.939 rad -> vector curl 50.44 deg
+Shared score: 0.989</title></circle><circle cx='133.48' cy='295.59' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 3 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.770, phase -0.032 rad -> vector curl 63.15 deg
+Shared score: 0.994</title></circle><circle cx='903.57' cy='511.77' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 4 (I_accum)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.878, phase 0.817 rad -> vector curl 69.67 deg
+Shared score: 0.995</title></circle><circle cx='749.73' cy='613.01' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 5 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.815, phase -0.649 rad -> vector curl 59.99 deg
+Shared score: 0.993</title></circle><circle cx='114.76' cy='300.19' r='7' fill='#8cd84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 6 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.763, phase -0.130 rad -> vector curl 56.76 deg
+Shared score: 0.992</title></circle><circle cx='564.91' cy='133.74' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 7 (I_accum)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.933, phase -0.570 rad -> vector curl 65.86 deg
+Shared score: 0.998</title></circle><circle cx='675.31' cy='144.77' r='7' fill='#d885d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 8 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.923, phase -0.481 rad -> vector curl 70.36 deg
+Shared score: 0.996</title></circle><circle cx='917.58' cy='462.59' r='7' fill='#8cd84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 9 (D_track)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.890, phase 0.628 rad -> vector curl 66.75 deg
+Shared score: 0.996</title></circle><circle cx='332.39' cy='146.45' r='7' fill='#8caf92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 10 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.859, phase 0.762 rad -> vector curl 64.38 deg
+Shared score: 0.992</title></circle><circle cx='920.00' cy='422.99' r='7' fill='#d885d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 11 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.901, phase 0.718 rad -> vector curl 64.37 deg
+Shared score: 0.994</title></circle><circle cx='162.17' cy='206.68' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 12 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.775, phase -0.015 rad -> vector curl 55.32 deg
+Shared score: 0.990</title></circle><circle cx='842.04' cy='267.62' r='7' fill='#8caf92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 13 (I_accum)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.932, phase 0.030 rad -> vector curl 39.60 deg
+Shared score: 0.995</title></circle><circle cx='561.99' cy='127.72' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 14 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.930, phase -0.603 rad -> vector curl 61.49 deg
+Shared score: 0.998</title></circle><circle cx='452.60' cy='599.94' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 15 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.713, phase 0.117 rad -> vector curl 56.76 deg
+Shared score: 0.992</title></circle><circle cx='281.96' cy='590.08' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 16 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.727, phase 0.304 rad -> vector curl 63.63 deg
+Shared score: 0.995</title></circle><circle cx='615.76' cy='120.00' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 17 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.924, phase -0.581 rad -> vector curl 68.19 deg
+Shared score: 0.995</title></circle><circle cx='793.58' cy='233.64' r='7' fill='#8cd84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 18 (D_track)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.936, phase -0.069 rad -> vector curl 54.22 deg
+Shared score: 0.993</title></circle><circle cx='156.04' cy='288.11' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 19 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.774, phase 0.059 rad -> vector curl 67.32 deg
+Shared score: 0.994</title></circle><circle cx='900.58' cy='509.85' r='7' fill='#d885d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 20 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.876, phase 0.837 rad -> vector curl 71.65 deg
+Shared score: 0.996</title></circle><circle cx='394.74' cy='168.26' r='7' fill='#8cd84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 21 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.852, phase 0.673 rad -> vector curl 51.09 deg
+Shared score: 0.993</title></circle><circle cx='918.66' cy='424.97' r='7' fill='#8caf92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 22 (I_accum)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.902, phase 0.653 rad -> vector curl 67.38 deg
+Shared score: 0.996</title></circle><circle cx='561.22' cy='136.21' r='7' fill='#d885d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 23 (L_smooth)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.932, phase -0.547 rad -> vector curl 67.98 deg
+Shared score: 0.995</title></circle><circle cx='681.63' cy='156.76' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 24 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.906, phase -0.625 rad -> vector curl 43.15 deg
+Shared score: 0.993</title></circle><circle cx='157.07' cy='257.52' r='7' fill='#8caf92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 25 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.777, phase -0.034 rad -> vector curl 55.38 deg
+Shared score: 0.994</title></circle><circle cx='799.63' cy='573.24' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 26 (L_smooth)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.814, phase -0.693 rad -> vector curl 62.93 deg
+Shared score: 0.992</title></circle><circle cx='918.45' cy='434.71' r='7' fill='#d8d84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 27 (D_track)
+Classification: shared
+Dominant bin: 0
+Bin 10: mag 0.898, phase 0.678 rad -> vector curl 70.19 deg
+Shared score: 0.998</title></circle><circle cx='196.68' cy='222.75' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 28 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.787, phase 0.066 rad -> vector curl 57.13 deg
+Shared score: 0.994</title></circle><circle cx='80.00' cy='431.69' r='7' fill='#8c85d8' stroke='#f8fafc' stroke-width='1.0'><title>Packet 29 (L_smooth)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.710, phase -0.921 rad -> vector curl 58.38 deg
+Shared score: 0.984</title></circle><circle cx='464.42' cy='620.00' r='7' fill='#8cd84c' stroke='#f8fafc' stroke-width='1.0'><title>Packet 30 (D_track)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.743, phase 0.042 rad -> vector curl 62.21 deg
+Shared score: 0.985</title></circle><circle cx='435.75' cy='598.09' r='7' fill='#d8af92' stroke='#f8fafc' stroke-width='1.0'><title>Packet 31 (I_accum)
+Classification: individual
+Dominant bin: 0
+Bin 10: mag 0.712, phase 0.216 rad -> vector curl 56.41 deg
+Shared score: 0.994</title></circle></svg><table><thead><tr><th>Packet</th><th>Cohort</th><th>Top bins</th><th>Bin 10</th><th>Vector curl</th></tr></thead><tbody><tr><td>0</td><td>D_track</td><td>0:0.96@-0.83, 1:0.95@-0.95, 2:0.93@0.87</td><td>mag 0.740, phase 0.201 rad</td><td>50.66 deg</td></tr><tr><td>1</td><td>I_accum</td><td>0:0.96@1.02, 1:0.95@0.92, 2:0.93@0.67</td><td>mag 0.738, phase 0.150 rad</td><td>59.12 deg</td></tr><tr><td>2</td><td>L_smooth</td><td>0:0.93@-0.25, 1:0.92@-0.33, 2:0.90@-0.56</td><td>mag 0.694, phase -0.939 rad</td><td>50.44 deg</td></tr><tr><td>3</td><td>D_track</td><td>0:1.05@-1.42, 1:1.04@-1.50, 2:1.02@0.36</td><td>mag 0.770, phase -0.032 rad</td><td>63.15 deg</td></tr><tr><td>4</td><td>I_accum</td><td>0:1.15@-0.49, 1:1.14@1.51, 2:1.12@1.26</td><td>mag 0.878, phase 0.817 rad</td><td>69.67 deg</td></tr><tr><td>5</td><td>L_smooth</td><td>0:1.06@0.08, 1:1.05@-0.00, 2:1.03@-0.24</td><td>mag 0.815, phase -0.649 rad</td><td>59.99 deg</td></tr><tr><td>6</td><td>D_track</td><td>0:1.05@-1.43, 1:1.03@0.58, 2:1.01@0.33</td><td>mag 0.763, phase -0.130 rad</td><td>56.76 deg</td></tr><tr><td>7</td><td>I_accum</td><td>0:1.26@-0.03, 1:1.24@-0.10, 2:1.22@-0.32</td><td>mag 0.933, phase -0.570 rad</td><td>65.86 deg</td></tr><tr><td>8</td><td>L_smooth</td><td>0:1.25@0.27, 1:1.23@0.18, 2:1.21@-0.07</td><td>mag 0.923, phase -0.481 rad</td><td>70.36 deg</td></tr><tr><td>9</td><td>D_track</td><td>0:1.17@1.40, 1:1.16@1.31, 2:1.14@1.07</td><td>mag 0.890, phase 0.628 rad</td><td>66.75 deg</td></tr><tr><td>10</td><td>I_accum</td><td>0:1.17@-0.68, 1:1.16@-0.76, 2:1.13@-0.99</td><td>mag 0.859, phase 0.762 rad</td><td>64.38 deg</td></tr><tr><td>11</td><td>L_smooth</td><td>0:1.20@1.20, 1:1.19@1.13, 2:1.17@0.92</td><td>mag 0.901, phase 0.718 rad</td><td>64.37 deg</td></tr><tr><td>12</td><td>D_track</td><td>0:1.08@-1.09, 1:1.06@-1.20, 2:1.04@-1.46</td><td>mag 0.775, phase -0.015 rad</td><td>55.32 deg</td></tr><tr><td>13</td><td>I_accum</td><td>0:1.25@0.73, 1:1.23@0.64, 2:1.21@0.40</td><td>mag 0.932, phase 0.030 rad</td><td>39.60 deg</td></tr><tr><td>14</td><td>L_smooth</td><td>0:1.26@-0.03, 1:1.24@-0.10, 2:1.22@-0.33</td><td>mag 0.930, phase -0.603 rad</td><td>61.49 deg</td></tr><tr><td>15</td><td>D_track</td><td>0:0.94@0.79, 1:0.93@0.71, 2:0.91@0.48</td><td>mag 0.713, phase 0.117 rad</td><td>56.76 deg</td></tr><tr><td>16</td><td>I_accum</td><td>0:0.95@-0.81, 1:0.94@-0.92, 2:0.92@0.91</td><td>mag 0.727, phase 0.304 rad</td><td>63.63 deg</td></tr><tr><td>17</td><td>L_smooth</td><td>0:1.25@0.11, 1:1.24@0.03, 2:1.21@-0.21</td><td>mag 0.924, phase -0.581 rad</td><td>68.19 deg</td></tr><tr><td>18</td><td>D_track</td><td>0:1.26@0.57, 1:1.24@0.50, 2:1.22@0.26</td><td>mag 0.936, phase -0.069 rad</td><td>54.22 deg</td></tr><tr><td>19</td><td>I_accum</td><td>0:1.05@-1.41, 1:1.04@-1.48, 2:1.02@0.38</td><td>mag 0.774, phase 0.059 rad</td><td>67.32 deg</td></tr><tr><td>20</td><td>L_smooth</td><td>0:1.15@-0.51, 1:1.14@1.50, 2:1.12@1.25</td><td>mag 0.876, phase 0.837 rad</td><td>71.65 deg</td></tr><tr><td>21</td><td>D_track</td><td>0:1.18@-0.55, 1:1.16@-0.65, 2:1.14@-0.90</td><td>mag 0.852, phase 0.673 rad</td><td>51.09 deg</td></tr><tr><td>22</td><td>I_accum</td><td>0:1.20@1.22, 1:1.18@1.15, 2:1.16@0.93</td><td>mag 0.902, phase 0.653 rad</td><td>67.38 deg</td></tr><tr><td>23</td><td>L_smooth</td><td>0:1.26@-0.03, 1:1.24@-0.10, 2:1.22@-0.32</td><td>mag 0.932, phase -0.547 rad</td><td>67.98 deg</td></tr><tr><td>24</td><td>D_track</td><td>0:1.23@0.23, 1:1.22@0.13, 2:1.20@-0.12</td><td>mag 0.906, phase -0.625 rad</td><td>43.15 deg</td></tr><tr><td>25</td><td>I_accum</td><td>0:1.07@-1.26, 1:1.06@-1.35, 2:1.04@0.49</td><td>mag 0.777, phase -0.034 rad</td><td>55.38 deg</td></tr><tr><td>26</td><td>L_smooth</td><td>0:1.08@-0.14, 1:1.06@-0.20, 2:1.04@-0.43</td><td>mag 0.814, phase -0.693 rad</td><td>62.93 deg</td></tr><tr><td>27</td><td>D_track</td><td>0:1.19@1.25, 1:1.18@1.18, 2:1.16@0.95</td><td>mag 0.898, phase 0.678 rad</td><td>70.19 deg</td></tr><tr><td>28</td><td>I_accum</td><td>0:1.09@-1.09, 1:1.08@-1.19, 2:1.05@-1.45</td><td>mag 0.787, phase 0.066 rad</td><td>57.13 deg</td></tr><tr><td>29</td><td>L_smooth</td><td>0:0.96@-0.04, 1:0.94@-0.14, 2:0.92@-0.39</td><td>mag 0.710, phase -0.921 rad</td><td>58.38 deg</td></tr><tr><td>30</td><td>D_track</td><td>0:0.97@0.80, 1:0.96@0.71, 2:0.94@0.47</td><td>mag 0.743, phase 0.042 rad</td><td>62.21 deg</td></tr><tr><td>31</td><td>I_accum</td><td>0:0.94@0.79, 1:0.93@0.73, 2:0.91@0.51</td><td>mag 0.712, phase 0.216 rad</td><td>56.41 deg</td></tr></tbody></table><h2>Quantum-Inspired BTC Miner Prototype</h2><p class='note'>Research-only pulse harvest path wired into ResearchConfinement. The lattice calibration stage simulates a silicon field envelope and mapped photonic basins before manifold folding. Production miner submit governor remains untouched.</p><div class='cards'><div class='card'><h3>Yield</h3><strong>0</strong><div>nonces per pulse</div></div><div class='card'><h3>Coherence</h3><strong>0.000</strong><div>peak acceptance band</div></div><div class='card'><h3>Nesting</h3><strong>4</strong><div>depth over 97 carriers</div></div><div class='card'><h3>Workers</h3><strong>14</strong><div>substrate-resident queue lanes</div></div><div class='card'><h3>R_eff</h3><strong>0.625</strong><div>X 0.735 | Y 0.643 | Z 0.469</div></div><div class='card'><h3>T_eff</h3><strong>0.898</strong><div>coherence bias 0.841</div></div><div class='card'><h3>Path Eq</h3><strong>0.001</strong><div>trajectory closure error</div></div><div class='card'><h3>Basis Drift</h3><strong>0.247</strong><div>ordering 0.003</div></div><div class='card'><h3>Lattice</h3><strong>0.615</strong><div>electron_basin</div></div><div class='card'><h3>Field Env</h3><strong>0.597</strong><div>tensor flux 0.490</div></div></div><svg class='proto-svg' width='1000' height='340' viewBox='0 0 1000 340'><line class='proto-edge' x1='164.00' y1='161.00' x2='264.80' y2='114.80' /><line class='proto-edge' x1='264.80' y1='114.80' x2='348.80' y2='167.60' /><line class='proto-edge' x1='348.80' y1='167.60' x2='416.00' y2='119.20' /><line class='proto-edge' x1='264.80' y1='114.80' x2='416.00' y2='119.20' /><line class='proto-edge' x1='416.00' y1='119.20' x2='483.20' y2='92.80' /><line class='proto-edge' x1='416.00' y1='119.20' x2='600.80' y2='163.20' /><line class='proto-edge' x1='483.20' y1='92.80' x2='600.80' y2='163.20' /><line class='proto-edge' x1='600.80' y1='163.20' x2='718.40' y2='110.40' /><line class='proto-edge' x1='718.40' y1='110.40' x2='802.40' y2='84.00' /><line class='proto-edge' x1='802.40' y1='84.00' x2='886.40' y2='123.60' /><line class='proto-edge' x1='718.40' y1='110.40' x2='810.80' y2='167.60' /><line class='proto-edge' x1='718.40' y1='110.40' x2='886.40' y2='123.60' /><line class='proto-edge' x1='810.80' y1='167.60' x2='886.40' y2='123.60' /><circle class='proto-ring' cx='164.00' cy='161.00' r='39.85'><title>Header Pulse weight=0.769</title></circle><circle class='proto-node' cx='164.00' cy='161.00' r='31.85'><title>Header Pulse weight=0.769</title></circle><polygon class='proto-play' points='156.99,152.08 156.99,169.92 175.46,161.00' /><text class='proto-label' x='164.00' y='210.85' text-anchor='middle'>Header Pulse</text><circle class='proto-ring' cx='264.80' cy='114.80' r='37.06'><title>Lattice Cal weight=0.615</title></circle><circle class='proto-node' cx='264.80' cy='114.80' r='29.06'><title>Lattice Cal weight=0.615</title></circle><polygon class='proto-play' points='258.41,106.66 258.41,122.94 275.26,114.80' /><text class='proto-label' x='264.80' y='161.86' text-anchor='middle'>Lattice Cal</text><circle class='proto-ring' cx='348.80' cy='167.60' r='44.00'><title>Vector Detect weight=1.000</title></circle><circle class='proto-node' cx='348.80' cy='167.60' r='36.00'><title>Vector Detect weight=1.000</title></circle><polygon class='proto-play' points='340.88,157.52 340.88,177.68 361.76,167.60' /><text class='proto-label' x='348.80' y='221.60' text-anchor='middle'>Vector Detect</text><circle class='proto-ring' cx='416.00' cy='119.20' r='44.00'><title>Psi Encode weight=1.000</title></circle><circle class='proto-node' cx='416.00' cy='119.20' r='36.00'><title>Psi Encode weight=1.000</title></circle><polygon class='proto-play' points='408.08,109.12 408.08,129.28 428.96,119.20' /><text class='proto-label' x='416.00' y='173.20' text-anchor='middle'>Psi Encode</text><circle class='proto-ring' cx='483.20' cy='92.80' r='35.00'><title>Clamp Band weight=0.500</title></circle><circle class='proto-node' cx='483.20' cy='92.80' r='27.00'><title>Clamp Band weight=0.500</title></circle><polygon class='proto-play' points='477.26,85.24 477.26,100.36 492.92,92.80' /><text class='proto-label' x='483.20' y='137.80' text-anchor='middle'>Clamp Band</text><circle class='proto-ring' cx='600.80' cy='163.20' r='40.37'><title>M_t Fold weight=0.798</title></circle><circle class='proto-node' cx='600.80' cy='163.20' r='32.37'><title>M_t Fold weight=0.798</title></circle><polygon class='proto-play' points='593.68,154.14 593.68,172.26 612.45,163.20' /><text class='proto-label' x='600.80' y='213.57' text-anchor='middle'>M_t Fold</text><circle class='proto-ring' cx='718.40' cy='110.40' r='37.26'><title>R_eff Projection weight=0.625</title></circle><circle class='proto-node' cx='718.40' cy='110.40' r='29.26'><title>R_eff Projection weight=0.625</title></circle><polygon class='proto-play' points='711.96,102.21 711.96,118.59 728.93,110.40' /><text class='proto-label' x='718.40' y='157.66' text-anchor='middle'>R_eff Projection</text><circle class='proto-ring' cx='802.40' cy='84.00' r='43.99'><title>Kernel Entry weight=0.999</title></circle><circle class='proto-node' cx='802.40' cy='84.00' r='35.99'><title>Kernel Entry weight=0.999</title></circle><polygon class='proto-play' points='794.48,73.92 794.48,94.08 815.36,84.00' /><text class='proto-label' x='802.40' y='137.99' text-anchor='middle'>Kernel Entry</text><circle class='proto-ring' cx='810.80' cy='167.60' r='43.88'><title>Crosstalk Cluster weight=0.993</title></circle><circle class='proto-node' cx='810.80' cy='167.60' r='35.88'><title>Crosstalk Cluster weight=0.993</title></circle><polygon class='proto-play' points='802.91,157.55 802.91,177.65 823.72,167.60' /><text class='proto-label' x='810.80' y='221.48' text-anchor='middle'>Crosstalk Cluster</text><circle class='proto-ring' cx='886.40' cy='123.60' r='44.00'><title>Stratum Queue weight=1.400</title></circle><circle class='proto-node' cx='886.40' cy='123.60' r='36.00'><title>Stratum Queue weight=1.400</title></circle><polygon class='proto-play' points='878.48,113.52 878.48,133.68 899.36,123.60' /><text class='proto-label' x='886.40' y='177.60' text-anchor='middle'>Stratum Queue</text></svg><h3>Pulse Injection Loop</h3><pre>lattice_cal = calibrate_silicon_lattice(nist, tensor_gradients, packet_classes, photonic_basins)
+Psi_encode = encode_basis(F, A, I, V, lattice_cal, pulse_packet_dev, mixed_cross_terms)
+Psi_t = M_t(Psi_encode, lattice_cal.environment_tensor, temporal_fold, crosstalk=shared_phase_lock, depth<=5)
+R_eff = project_effective_vector(Psi_t) -> [X, Y, Z, T_eff]
+diag = evaluate_vector_consistency(R_eff, path_equiv, ordering_delta, basis_rotation)
+header_freq = pulse_packet_dev(block_header, quartet, photon_pulse)
+target_cap = clamp_band(a_code, btc_target_interval, trap_ratio, viol_band)
+phase_event = indexed_phase_length_event(target_phase_windows, carrier_idx, pulse_idx) -> amplitude_pressure_confinement
+interference_field = detect_vectors_from_lattice(kernels, target_windows, cascade_interval, coupling_gradients)
+simulation_field = calibrate_fields_in_flight(interference_field, target_windows, kernel_execution_event)
+coherent_vectors = bias_nonce_trajectories(R_eff, target_cap, btc_target_windows, interference_field, carriers=70)
+hash_probe = expand_target_probe_neighborhood(coherent_vectors, btc_target_hex, offsets=cluster_weighted_target_offsets)
+candidate_next_state = evolve_state(current_state, coherent_vectors, ctx)
+ledger_delta = compute_ledger_delta(current_state, candidate_next_state, ctx)
+nonce_batch = harvest_coherent_nonces(coherent_vectors, yield_cap=20..70)
+worker_queue = package_stratum_batches(nonce_batch, workers=6..14)
+</pre><h3>Encoded Manifold State</h3><table><thead><tr><th>Layer</th><th>Values</th><th>Notes</th></tr></thead><tbody><tr><td>Lattice Cal</td><td>field=0.615, exposure=0.597, basin=electron_basin</td><td>NIST silicon anchor, tensor gradients, and packet classes collapsed into photonic basin pressures.</td></tr><tr><td>Psi_encode</td><td>state_norm=1.427, F_I=-0.399, A_V=-0.381</td><td>Control quartet encoded into the latent excitation basis.</td></tr><tr><td>M_t(Psi)</td><td>coherence=0.798, field_resonance=0.687, transport_norm=0.130</td><td>Temporal fold and crosstalk operator applied without full collapse.</td></tr><tr><td>R_eff</td><td>X=0.735, Y=0.643, Z=0.469, T_eff=0.898</td><td>Projected effective vector used to bias nonce trajectories.</td></tr><tr><td>Diagnostics</td><td>path=0.001, order=0.003, basis=0.247</td><td>Consistency checks for path equivalence, ordering, and basis transforms.</td></tr></tbody></table><h3>Silicon Lattice Calibration</h3><table><thead><tr><th>Basin</th><th>Field</th><th>Depth</th><th>Occupancy</th><th>Tensor Align</th></tr></thead><tbody><tr><td>electron_basin</td><td>charge_field / electron</td><td>0.565</td><td>0.618</td><td>0.791</td></tr><tr><td>phonon_basin</td><td>lattice_field / phonon</td><td>0.554</td><td>0.499</td><td>0.137</td></tr><tr><td>exciton_basin</td><td>coherence_field / exciton</td><td>0.548</td><td>0.420</td><td>0.571</td></tr><tr><td>hole_basin</td><td>vacancy_field / hole</td><td>0.215</td><td>0.366</td><td>0.096</td></tr></tbody></table><p class='note'>charge=0.723 | lattice=0.445 | coherence=0.427 | vacancy=0.179</p><h3>Live Pulse History</h3><table><thead><tr><th>Pulse</th><th>Yield</th><th>Coherence</th><th>|R_eff|</th><th>T_eff</th><th>Field</th><th>Depth</th><th>Workers</th><th>Preview</th></tr></thead><tbody><tr><td>0</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr><tr><td>1</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr><tr><td>2</td><td>0</td><td>0.000</td><td>0.630</td><td>0.893</td><td>0.615</td><td>0</td><td>14</td><td></td></tr><tr><td>3</td><td>0</td><td>0.000</td><td>0.629</td><td>0.888</td><td>0.615</td><td>0</td><td>14</td><td></td></tr><tr><td>4</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr><tr><td>5</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr><tr><td>6</td><td>0</td><td>0.000</td><td>0.633</td><td>0.896</td><td>0.615</td><td>0</td><td>14</td><td></td></tr><tr><td>7</td><td>0</td><td>0.000</td><td>0.625</td><td>0.898</td><td>0.615</td><td>0</td><td>14</td><td></td></tr><tr><td>8</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr><tr><td>9</td><td>0</td><td>0.000</td><td>0.000</td><td>0.000</td><td>0.615</td><td>0</td><td>9</td><td></td></tr></tbody></table><h3>Yield Sequence</h3><p class='note'>Yield=0, 0, 0, 0, 0, 0, 0, 0, 0, 0 | Coherence=0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000, 0.000 | |R_eff|=0.000, 0.000, 0.630, 0.629, 0.000, 0.000, 0.633, 0.625, 0.000, 0.000 | T_eff=0.000, 0.000, 0.893, 0.888, 0.000, 0.000, 0.896, 0.898, 0.000, 0.000</p><h3>Latest Worker Batches</h3><table><thead><tr><th>Worker</th><th>Batch Size</th><th>Queue Depth</th><th>Preview</th></tr></thead><tbody></tbody></table></body></html>

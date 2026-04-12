@@ -1,0 +1,16 @@
+{
+  "name": "qbit_miner_device_hardware_profile",
+  "version": 1,
+  "required_top_level_fields": [
+    "hardware_profile_id",
+    "operator_id",
+    "device_model",
+    "gpu_device_id",
+    "driver_version",
+    "cooling_class",
+    "primary_target_network",
+    "power_draw_watts",
+    "electricity_cost_usd_per_kwh",
+    "measured_device_window"
+  ]
+}

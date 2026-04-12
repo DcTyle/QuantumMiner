@@ -1,0 +1,153 @@
+
+"""
+VHW / state.py — Rule-aligned in-memory state with damped decay and snapshots
+- Tracks rolling counters and emits ascii_floatmap-compatible snapshots.
+"""
+
+from __future__ import annotations
+from typing import Dict, Any
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+
+# ---------------------------------------------------------------------------
+# Minimal Fallback (only if not already defined)
+# ---------------------------------------------------------------------------
+
+# === Unified Rule-Block Helper (tokens @A–@G) ===
+# Embedded per-file for portability as direct replacements.
+from typing import Dict, Any, List, Optional
+import time, math, hashlib, json
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _now() -> float:
+    return float(time.time())
+
+def _sha256(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return ''.join(_float_to_ascii(x) for x in vec)
+
+def _fetch_rule_manifest() -> Dict[str, Any]:
+    # Attempt to pull from a canonical location if available.
+    try:
+        from core import utils
+        m = utils.get("canonical/rule_blocks_unified", {})
+        if isinstance(m, dict) and m.get("token_table"):
+            return m
+    except Exception:
+        pass
+    # Fallback to the uploaded manifest (plain-text JSON provided earlier)
+    return {
+        "token_table": {
+            "@A": [0.191489, -0.106383],
+            "@B": [0.468085,  0.191489],
+            "@C": [-0.085106, 0.106383],
+            "@D": [0.319149, -0.680851],
+            "@E": [0.106383,  0.276596],
+            "@F": [-0.148936, 0.468085],
+            "@G": [0.063830, -0.425532]
+        }
+    }
+
+class RuleParams:
+    def __init__(self, manifest: Optional[Dict[str, Any]] = None):
+        mf = manifest or _fetch_rule_manifest()
+        T = mf.get("token_table", {})
+        get = lambda k: T.get(k, [0.0, 0.0])
+        self.A = get("@A"); self.B = get("@B"); self.C = get("@C")
+        self.D = get("@D"); self.E = get("@E"); self.F = get("@F"); self.G = get("@G")
+
+    @property
+    def ema_alpha(self) -> float:
+        return _clamp(0.20 + 0.15 * (self.C[1]), 0.05, 0.35)
+
+    @property
+    def damp_gain(self) -> float:
+        return _clamp(0.5 + 0.3 * (self.D[0]), 0.2, 0.8)
+
+    @property
+    def headroom(self) -> float:
+        return _clamp(0.12 + 0.08 * (self.E[1] - 0.1), 0.05, 0.20)
+
+    @property
+    def phase_step(self) -> float:
+        return _clamp(0.010 + 0.010 * (self.G[0] + 0.2), 0.005, 0.025)
+
+    @property
+    def coherence_lambda(self) -> float:
+        return _clamp(0.0015 + 0.0035 * max(0.0, self.C[0] + 0.2), 0.001, 0.006)
+
+    @property
+    def diff_attn(self) -> float:
+        return _clamp(1e-11 * (1.0 + 0.5 * self.D[1]), 1e-12, 5e-11)
+
+    def harmonic_bias(self, phase: float) -> float:
+        return 0.01 * math.sin(2.0 * math.pi * phase)
+
+
+class DampedState:
+    def __init__(self):
+        self.rule = RuleParams()
+        self._lock = threading.RLock()
+        self.counters = {"events": 0, "warnings": 0, "errors": 0}
+        self.decayed = 0.0
+        self.phase = 0.0
+
+    def add(self, key: str, amount: int = 1):
+        with self._lock:
+            self.counters[key] = int(self.counters.get(key, 0)) + int(amount)
+
+    def decay(self):
+        with self._lock:
+            lam = self.rule.coherence_lambda
+            self.decayed = max(0.0, self.decayed * (1.0 - lam) + sum(self.counters.values()) * lam * 0.1)
+            self.phase = (self.phase + self.rule.phase_step) % 1.0
+
+    def snapshot(self) -> Dict[str, Any]:
+        with self._lock:
+            vec = [
+                _clamp(self.decayed / 100.0, 0.0, 1.0)*2.0-1.0,
+                _clamp((self.phase % 1.0), 0.0, 1.0)*2.0-1.0,
+                _clamp(sum(self.counters.values()) / 1000.0, 0.0, 1.0)*2.0-1.0,
+            ]
+            tok = _ascii_from_vector(vec)
+            return {"header": {"encoding": "ascii_floatmap_v1", "t_s": _now()}, "vector_ascii": tok, "counters": dict(self.counters)}
+        # ---------------------------------------------------------------------------
+# StateSnapshot Fallback (ensures availability system-wide)
+# ---------------------------------------------------------------------------
+class StateSnapshot:
+    """Minimal interface for cross-module VHW.state compatibility."""
+
+    def __init__(self) -> None:
+        self._data: Dict[str, Any] = {}
+
+    def capture(self) -> Dict[str, Any]:
+        """Return a copy of current state."""
+        return dict(self._data)
+
+    def restore(self, state: Dict[str, Any]) -> None:
+        """Load provided state dictionary."""
+        self._data = dict(state or {})
+
+    def clear(self) -> None:
+        """Reset stored state."""
+        self._data.clear()
+
+    def __repr__(self) -> str:
+        return f"<StateSnapshot keys={len(self._data)}>"

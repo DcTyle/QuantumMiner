@@ -1,0 +1,642 @@
+[
+  {
+    "kind": "thermal_interference",
+    "frame_index": 0,
+    "severity": 0.610655,
+    "trajectory": [
+      -0.176363,
+      0.309902,
+      -0.054372,
+      0.01
+    ],
+    "correction_turns": 0.122512,
+    "correction_norm": 0.406872,
+    "transport_norm": 0.659171,
+    "observer_damping": 0.528373,
+    "node_index": 0,
+    "node_word": 939104216,
+    "node_id": "PNODE-00-37f997d8",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 0,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.176363,
+      0.309902,
+      -0.054372,
+      0.01
+    ],
+    "correction_turns": 0.113682,
+    "correction_norm": 0.329523,
+    "transport_norm": 0.659171,
+    "observer_damping": 0.528373,
+    "node_index": 1,
+    "node_word": 2817054025,
+    "node_id": "PNODE-00-a7e8d549",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 0,
+    "severity": 0.648283,
+    "trajectory": [
+      -0.176363,
+      0.309902,
+      -0.054372,
+      0.01
+    ],
+    "correction_turns": 0.125374,
+    "correction_norm": 0.431943,
+    "transport_norm": 0.659171,
+    "observer_damping": 0.528373,
+    "node_index": 2,
+    "node_word": 625360170,
+    "node_id": "PNODE-00-25463d2a",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 0,
+    "severity": 0.458559,
+    "trajectory": [
+      -0.176363,
+      0.309902,
+      -0.054372,
+      0.01
+    ],
+    "correction_turns": 0.110943,
+    "correction_norm": 0.305533,
+    "transport_norm": 0.659171,
+    "observer_damping": 0.528373,
+    "node_index": 3,
+    "node_word": 1037535585,
+    "node_id": "PNODE-00-3dd78961",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0bace2-084d91-09742d-0a0ee3-002710-055174-080ff5-098d16-0695ae"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 1,
+    "severity": 0.590623,
+    "trajectory": [
+      -0.176456,
+      0.28486,
+      -0.051752,
+      0.02
+    ],
+    "correction_turns": 0.147634,
+    "correction_norm": 0.402965,
+    "transport_norm": 1.0,
+    "observer_damping": 0.507848,
+    "node_index": 0,
+    "node_word": 1266440290,
+    "node_id": "PNODE-01-4b7c5862",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 1,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.176456,
+      0.28486,
+      -0.051752,
+      0.02
+    ],
+    "correction_turns": 0.138718,
+    "correction_norm": 0.337427,
+    "transport_norm": 1.0,
+    "observer_damping": 0.507848,
+    "node_index": 1,
+    "node_word": 2709309855,
+    "node_id": "PNODE-01-a17cc99f",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 1,
+    "severity": 0.677449,
+    "trajectory": [
+      -0.176456,
+      0.28486,
+      -0.051752,
+      0.02
+    ],
+    "correction_turns": 0.155693,
+    "correction_norm": 0.462204,
+    "transport_norm": 1.0,
+    "observer_damping": 0.507848,
+    "node_index": 2,
+    "node_word": 2887607740,
+    "node_id": "PNODE-01-ac1d65bc",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 1,
+    "severity": 0.445218,
+    "trajectory": [
+      -0.176456,
+      0.28486,
+      -0.051752,
+      0.02
+    ],
+    "correction_turns": 0.134138,
+    "correction_norm": 0.303759,
+    "transport_norm": 1.0,
+    "observer_damping": 0.507848,
+    "node_index": 3,
+    "node_word": 1030780856,
+    "node_id": "PNODE-01-3d7077b8",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b8361-08dd2d-0988bf-0f4240-004e20-05af76-07bfc8-09a100-06d1b6"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 2,
+    "severity": 0.618013,
+    "trajectory": [
+      -0.171791,
+      0.275036,
+      -0.050234,
+      0.03
+    ],
+    "correction_turns": 0.149097,
+    "correction_norm": 0.421327,
+    "transport_norm": 1.0,
+    "observer_damping": 0.514812,
+    "node_index": 0,
+    "node_word": 1412631527,
+    "node_id": "PNODE-02-54330be7",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 2,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.171791,
+      0.275036,
+      -0.050234,
+      0.03
+    ],
+    "correction_turns": 0.137722,
+    "correction_norm": 0.337167,
+    "transport_norm": 1.0,
+    "observer_damping": 0.514812,
+    "node_index": 1,
+    "node_word": 2388021765,
+    "node_id": "PNODE-02-8e565205",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 2,
+    "severity": 0.677639,
+    "trajectory": [
+      -0.171791,
+      0.275036,
+      -0.050234,
+      0.03
+    ],
+    "correction_turns": 0.154592,
+    "correction_norm": 0.461977,
+    "transport_norm": 1.0,
+    "observer_damping": 0.514812,
+    "node_index": 2,
+    "node_word": 3262542641,
+    "node_id": "PNODE-02-c2767331",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 2,
+    "severity": 0.42999,
+    "trajectory": [
+      -0.171791,
+      0.275036,
+      -0.050234,
+      0.03
+    ],
+    "correction_turns": 0.131771,
+    "correction_norm": 0.293143,
+    "transport_norm": 1.0,
+    "observer_damping": 0.514812,
+    "node_index": 3,
+    "node_word": 1212583843,
+    "node_id": "PNODE-02-48468fa3",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b4d8f-08cac3-097bb5-0f4240-007530-05a955-07dafc-097b99-06c454"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 3,
+    "severity": 0.619845,
+    "trajectory": [
+      -0.166814,
+      0.266685,
+      -0.048931,
+      0.04
+    ],
+    "correction_turns": 0.148406,
+    "correction_norm": 0.421563,
+    "transport_norm": 1.0,
+    "observer_damping": 0.506515,
+    "node_index": 0,
+    "node_word": 2173071934,
+    "node_id": "PNODE-03-8186723e",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 3,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.166814,
+      0.266685,
+      -0.048931,
+      0.04
+    ],
+    "correction_turns": 0.136929,
+    "correction_norm": 0.336359,
+    "transport_norm": 1.0,
+    "observer_damping": 0.506515,
+    "node_index": 1,
+    "node_word": 921547795,
+    "node_id": "PNODE-03-36edb413",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 3,
+    "severity": 0.622955,
+    "trajectory": [
+      -0.166814,
+      0.266685,
+      -0.048931,
+      0.04
+    ],
+    "correction_turns": 0.148691,
+    "correction_norm": 0.423678,
+    "transport_norm": 1.0,
+    "observer_damping": 0.506515,
+    "node_index": 2,
+    "node_word": 1079679173,
+    "node_id": "PNODE-03-405a98c5",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 3,
+    "severity": 0.416123,
+    "trajectory": [
+      -0.166814,
+      0.266685,
+      -0.048931,
+      0.04
+    ],
+    "correction_turns": 0.129742,
+    "correction_norm": 0.283009,
+    "transport_norm": 1.0,
+    "observer_damping": 0.506515,
+    "node_index": 3,
+    "node_word": 1264615846,
+    "node_id": "PNODE-03-4b6081a6",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0b1c9e-08ae0d-096cee-0f4240-009c40-059f78-07ba93-095396-06c9ac"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 4,
+    "severity": 0.662765,
+    "trajectory": [
+      -0.162207,
+      0.256164,
+      -0.047606,
+      0.05
+    ],
+    "correction_turns": 0.150436,
+    "correction_norm": 0.450215,
+    "transport_norm": 1.0,
+    "observer_damping": 0.518996,
+    "node_index": 0,
+    "node_word": 1941681830,
+    "node_id": "PNODE-04-73bbb6a6",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 4,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.162207,
+      0.256164,
+      -0.047606,
+      0.05
+    ],
+    "correction_turns": 0.135218,
+    "correction_norm": 0.335957,
+    "transport_norm": 1.0,
+    "observer_damping": 0.518996,
+    "node_index": 1,
+    "node_word": 2772898517,
+    "node_id": "PNODE-04-a54712d5",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 4,
+    "severity": 0.631529,
+    "trajectory": [
+      -0.162207,
+      0.256164,
+      -0.047606,
+      0.05
+    ],
+    "correction_turns": 0.14761,
+    "correction_norm": 0.428997,
+    "transport_norm": 1.0,
+    "observer_damping": 0.518996,
+    "node_index": 2,
+    "node_word": 4105713382,
+    "node_id": "PNODE-04-f4b836e6",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 4,
+    "severity": 0.404718,
+    "trajectory": [
+      -0.162207,
+      0.256164,
+      -0.047606,
+      0.05
+    ],
+    "correction_turns": 0.12709,
+    "correction_norm": 0.274924,
+    "transport_norm": 1.0,
+    "observer_damping": 0.518996,
+    "node_index": 3,
+    "node_word": 2069703482,
+    "node_id": "PNODE-04-7b5d2b3a",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0af5b8-08af8d-0964db-0f4240-00c350-059551-07eb54-093822-06b329"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 5,
+    "severity": 0.638115,
+    "trajectory": [
+      -0.158304,
+      0.245846,
+      -0.046344,
+      0.06
+    ],
+    "correction_turns": 0.149358,
+    "correction_norm": 0.43361,
+    "transport_norm": 1.0,
+    "observer_damping": 0.516014,
+    "node_index": 0,
+    "node_word": 3082470398,
+    "node_id": "PNODE-05-b7bac3fe",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 5,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.158304,
+      0.245846,
+      -0.046344,
+      0.06
+    ],
+    "correction_turns": 0.136269,
+    "correction_norm": 0.336066,
+    "transport_norm": 1.0,
+    "observer_damping": 0.516014,
+    "node_index": 1,
+    "node_word": 3727172871,
+    "node_id": "PNODE-05-de282507",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 5,
+    "severity": 0.663268,
+    "trajectory": [
+      -0.158304,
+      0.245846,
+      -0.046344,
+      0.06
+    ],
+    "correction_turns": 0.151651,
+    "correction_norm": 0.450702,
+    "transport_norm": 1.0,
+    "observer_damping": 0.516014,
+    "node_index": 2,
+    "node_word": 4280958193,
+    "node_id": "PNODE-05-ff2a3cf1",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 5,
+    "severity": 0.39529,
+    "trajectory": [
+      -0.158304,
+      0.245846,
+      -0.046344,
+      0.06
+    ],
+    "correction_turns": 0.127218,
+    "correction_norm": 0.268607,
+    "transport_norm": 1.0,
+    "observer_damping": 0.516014,
+    "node_index": 3,
+    "node_word": 1260250960,
+    "node_id": "PNODE-05-4b1de750",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0ad6b6-08bf3c-0960ba-0f4240-00ea60-05928c-07dfae-09243d-06bcb8"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 6,
+    "severity": 0.685042,
+    "trajectory": [
+      -0.152953,
+      0.235573,
+      -0.045299,
+      0.07
+    ],
+    "correction_turns": 0.15107,
+    "correction_norm": 0.464338,
+    "transport_norm": 1.0,
+    "observer_damping": 0.525204,
+    "node_index": 0,
+    "node_word": 4092873333,
+    "node_id": "PNODE-06-f3f44a75",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 6,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.152953,
+      0.235573,
+      -0.045299,
+      0.07
+    ],
+    "correction_turns": 0.133993,
+    "correction_norm": 0.335228,
+    "transport_norm": 1.0,
+    "observer_damping": 0.525204,
+    "node_index": 1,
+    "node_word": 2789915174,
+    "node_id": "PNODE-06-a64aba26",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 6,
+    "severity": 0.64295,
+    "trajectory": [
+      -0.152953,
+      0.235573,
+      -0.045299,
+      0.07
+    ],
+    "correction_turns": 0.147297,
+    "correction_norm": 0.435807,
+    "transport_norm": 1.0,
+    "observer_damping": 0.525204,
+    "node_index": 2,
+    "node_word": 3306127519,
+    "node_id": "PNODE-06-c50f809f",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 6,
+    "severity": 0.387473,
+    "trajectory": [
+      -0.152953,
+      0.235573,
+      -0.045299,
+      0.07
+    ],
+    "correction_turns": 0.124392,
+    "correction_norm": 0.262638,
+    "transport_norm": 1.0,
+    "observer_damping": 0.525204,
+    "node_index": 3,
+    "node_word": 1914599271,
+    "node_id": "PNODE-06-721e7767",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0abceb-08c53a-095a57-0f4240-011170-05831a-080394-090dfa-06a730"
+  },
+  {
+    "kind": "thermal_interference",
+    "frame_index": 7,
+    "severity": 0.626807,
+    "trajectory": [
+      -0.148499,
+      0.225922,
+      -0.044328,
+      0.08
+    ],
+    "correction_turns": 0.147976,
+    "correction_norm": 0.424712,
+    "transport_norm": 1.0,
+    "observer_damping": 0.508713,
+    "node_index": 0,
+    "node_word": 2982885252,
+    "node_id": "PNODE-07-b1cb3784",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8"
+  },
+  {
+    "kind": "field_layer_interference",
+    "frame_index": 7,
+    "severity": 0.494565,
+    "trajectory": [
+      -0.148499,
+      0.225922,
+      -0.044328,
+      0.08
+    ],
+    "correction_turns": 0.135947,
+    "correction_norm": 0.335107,
+    "transport_norm": 1.0,
+    "observer_damping": 0.508713,
+    "node_index": 1,
+    "node_word": 2815095340,
+    "node_id": "PNODE-07-a7caf22c",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8"
+  },
+  {
+    "kind": "return_latency_gap",
+    "frame_index": 7,
+    "severity": 0.647631,
+    "trajectory": [
+      -0.148499,
+      0.225922,
+      -0.044328,
+      0.08
+    ],
+    "correction_turns": 0.14987,
+    "correction_norm": 0.438821,
+    "transport_norm": 1.0,
+    "observer_damping": 0.508713,
+    "node_index": 2,
+    "node_word": 3819162939,
+    "node_id": "PNODE-07-e3a3cd3b",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8"
+  },
+  {
+    "kind": "resonance_shear",
+    "frame_index": 7,
+    "severity": 0.381581,
+    "trajectory": [
+      -0.148499,
+      0.225922,
+      -0.044328,
+      0.08
+    ],
+    "correction_turns": 0.12567,
+    "correction_norm": 0.258551,
+    "transport_norm": 1.0,
+    "observer_damping": 0.508713,
+    "node_index": 3,
+    "node_word": 330858835,
+    "node_id": "PNODE-07-13b88153",
+    "encodable_node": true,
+    "photonic_identity": "PID9-0aab40-08d89e-09582e-0f4240-013880-057f29-07c329-08fef6-06c4c8"
+  }
+]

@@ -1,0 +1,131 @@
+# Run 044 Lab Notes
+
+- run id: `run_044_substrate_microprocess_and_live_telemetry_resonance`
+- generated utc: 2026-04-09T05:09:54.0062161Z
+- runtime entry points:
+  - `VHW.gpu_pulse_runtime.benchmark_substrate_microprocess`
+  - `VHW.gpu_pulse_runtime.benchmark_telemetry_resonance`
+  - `VHW.gpu_pulse_runtime.run_substrate_telemetry_resonance`
+  - `VHW.gpu_pulse_runtime.run_classical_telemetry_resonance`
+  - `VHW.gpu_pulse_runtime._vulkan_calibration_actuation`
+  - `VHW.system_utils.device_snapshot`
+- external actuation path:
+  - `ResearchConfinement/Calibrationkernals/vulkan_gpu_calibration_kernels/src/main.cpp`
+
+## Execution payloads
+- substrate microprocess payload:
+  - `artifact_count = 256`
+  - `pulse_cycles = 8`
+  - `repeat_count = 5`
+  - `warmup_count = 1`
+- synthetic startup telemetry payload:
+  - `frame_count = 160`
+  - `horizon_frames = 4`
+  - `pulse_cycles = 5`
+  - `repeat_count = 4`
+  - `warmup_count = 1`
+  - `noise_scale = 0.08`
+  - `telemetry_sample_period_s = 0.004`
+  - `assumed_pulse_generation_ns = 180000`
+  - `assumed_kernel_request_ns = 260000`
+  - `assumed_kernel_actuation_ns = 120000`
+- live startup telemetry payload:
+  - `telemetry_mode = live_startup`
+  - `actuation_backend = vulkan_calibration`
+  - `frame_count = 8`
+  - `horizon_frames = 2`
+  - `pulse_cycles = 3`
+  - `repeat_count = 1`
+  - `warmup_count = 0`
+  - `telemetry_sample_period_s = 0.02`
+  - `capture_sleep = true`
+  - `actuation_settle_s = 0.004`
+  - `vulkan_element_count = 8192`
+  - `vulkan_iterations = 24`
+  - `vulkan_frequency = 0.245`
+  - `vulkan_amplitude = 0.18`
+  - `vulkan_voltage = 0.33`
+  - `vulkan_current = 0.33`
+
+## Core observations
+- substrate microprocess:
+  - results match: `true`
+  - total speedup: `1.6829795435216928x`
+  - exec-only speedup: `1.8485025376505608x`
+  - route case: `string_fold`
+  - result tag: `6e472963-b461dde1-7958a892`
+  - trace gate: `0.9803921568627451`
+  - trace alignment: `0.8127607723125523`
+- synthetic telemetry resonance:
+  - results match: `true`
+  - trace-state match: `true`
+  - total speedup: `3.500636302412586x`
+  - exec-only speedup: `5.290160073244487x`
+  - route case: `string_fold`
+  - result tag: `ab7a72a7-8936c40b-625f5816`
+  - resonance gate: `0.6515733471239816`
+  - noise gate: `0.005869862170219911`
+  - predicted latency: `0.015418717524415069 s`
+  - actuation compensation: `0.5855153453099242`
+  - throughput estimate: `64.8562371297438 Hz`
+- live startup telemetry resonance:
+  - actuation backend: `vulkan_calibration`
+  - device tag: `NVIDIA GeForce RTX 2060`
+  - actuation applied: `true`
+  - actuation calls: `8`
+  - mean actuation elapsed: `0.8912025249956059 s`
+  - mean dispatch time: `26.723499999999998 ms`
+  - mean load hint: `0.26465699277`
+  - results match: `true`
+  - trace-state match: `true`
+  - total speedup: `2.90718339924873x`
+  - exec-only speedup: `5.486867172616259x`
+  - route case: `enum_switch`
+  - result tag: `06d46fc9-9efbd8ab-6ce03820`
+  - resonance gate: `0.6489265443156257`
+  - noise gate: `1.5110028000017706e-05`
+  - predicted latency: `0.008410595782358508 s`
+  - actuation compensation: `0.8081532883197177`
+  - throughput estimate: `118.89764124647766 Hz`
+
+## Encoded process and telemetry data
+- process encoding result words:
+  - `dispatch_word = 1850157411`
+  - `string_word = 3026312673`
+  - `structure_word = 2035853458`
+  - `result_word = 2742967312`
+- synthetic dominant nodes:
+  - `gpu_util`, resonance `0.6845873821995972`, near term `0.6546309761392579`
+  - `mem_bw_util`, resonance `0.6733580974064165`, near term `0.6283846771869084`
+  - `global_util`, resonance `0.5967745617659314`, near term `0.4543277388739281`
+- live dominant nodes:
+  - `gpu_util`, resonance `0.665429171808398`, near term `0.333886744015368`
+  - `global_util`, resonance `0.6639106526975175`, near term `0.33219234643572`
+  - `mem_bw_util`, resonance `0.6174398084409616`, near term `0.22268807823153194`
+- live frame interpretation:
+  - `raw_gpu_util = 0.0` across the captured window
+  - `gpu_util` in the working frame plane was lifted by the actuation load hint
+  - `mem_bw_util` in the working frame plane was lifted by the actuation load hint plus kernel persistence and pulse signal
+  - `global_util` followed the maximum of `cpu_util`, `gpu_util`, and `mem_bw_util`
+
+## Certainty statement (model scope)
+- strong within-run claim:
+  - encoded runtime artifacts can be transformed through the substrate trace loop and decoded back to the same baseline values faster than the classical comparison path.
+  - synthetic telemetry can drive the substrate path to the same decoded result and the same trace-state as the classical path.
+  - real Vulkan-backed live telemetry capture can produce an actuation-adjusted frame plane that also preserves result and trace-state equivalence.
+- bounded claim:
+  - latency-aware actuation forecasting is sufficient to hold equivalence on the tested startup telemetry windows.
+  - the live actuation point can be represented fast enough for the current substrate runtime to consume it.
+- not yet claimed:
+  - raw per-kernel telemetry is already the sole sufficient substrate for general computation.
+  - the measured speedups are already production GPU-kernel speedups for the whole engine.
+  - live mining PoW is already solved entirely by telemetry-driven substrate execution.
+
+## Data products
+- benchmark summary: [run_044_benchmark_summary.csv](./run_044_benchmark_summary.csv)
+- forecast preview table: [run_044_forecast_preview.csv](./run_044_forecast_preview.csv)
+- dominant-node table: [run_044_dominant_nodes.csv](./run_044_dominant_nodes.csv)
+- live startup frame capture: [run_044_live_startup_frames.csv](./run_044_live_startup_frames.csv)
+- formal review: [run_044_formal_review.md](./run_044_formal_review.md)
+- equation stack: [run_044_equation_stack.md](./run_044_equation_stack.md)
+- summary json: [run_044_research_summary.json](./run_044_research_summary.json)

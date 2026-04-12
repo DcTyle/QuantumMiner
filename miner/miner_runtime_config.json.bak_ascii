@@ -1,0 +1,109 @@
+{
+  "wallets": {
+    "BTC": "3FbC1wKBXRx3yUYaLXXyEjKxPLpehnLogB",
+    "LTC": "M8359mbCa4iAX9eXkNtPWtF33Mm2M6c2Qq",
+    "ETC": "0x5119bF3205dbA7b22E58A7e9FD934c342fDD8Ab3",
+    "RVN": "RSYEUmpvdErLArh2SSqPfDPyfka1VpDrfc",
+    "ERG": "0x5119bF3205dbA7b22E58A7e9FD934c342fDD8Ab3"
+  },
+
+  "pools": {
+    "BTC": "stratum+tcp://btc.2miners.com:2020",
+    "LTC": "stratum+tcp://ltc.2miners.com:6060",
+    "ETC": "stratum+tcp://etc.2miners.com:1010",
+    "RVN": "stratum+tcp://rvn.2miners.com:6060",
+    "ERG": "stratum+tcp://erg.2miners.com:8888"
+  },
+
+  "algorithms": {
+    "BTC": "sha256d",
+    "LTC": "scrypt",
+    "ETC": "etchash",
+    "RVN": "kawpow",
+    "ERG": "autolykos"
+  },
+
+  "runtime": {
+    "total_phs": 0.3,
+    "max_fraction_per_network": 0.4,
+    "btc_overflow_sink": true
+  },
+
+  "network": {
+    "auto_refresh_interval_sec": 60,
+    "retry_interval_sec": 10
+  },
+
+  "system": {
+    "mode": "ADA_v3.3_HYBRID",
+    "vqram_policy": "vram_hot_ram_cold",
+    "self_healing": true,
+    "tier": 10,
+    "mining_period_s": 0.02,
+    "prediction_period_s": 2.0,
+    "multiplexer_flush_interval_s": 5.0
+  },
+
+  "coins": {
+    "BTC": {
+      "mode": "stratum",
+      "algorithm": "sha256d",
+      "hashrate_sim_hs": 100000000.0,
+      "resource_share": 1.0,
+      "avg_latency_ms": 100,
+      "wallet_address": "3FbC1wKBXRx3yUYaLXXyEjKxPLpehnLogB",
+      "stratum": {
+        "host": "btc.2miners.com",
+        "port": 2020
+      }
+    },
+    "ETC": {
+      "mode": "stratum",
+      "algorithm": "etchash",
+      "hashrate_sim_hs": 96000000.0,
+      "resource_share": 1.0,
+      "avg_latency_ms": 120,
+      "wallet_address": "0x5119bF3205dbA7b22E58A7e9FD934c342fDD8Ab3",
+      "stratum": {
+        "host": "etc.2miners.com",
+        "port": 1010
+      }
+    },
+    "RVN": {
+      "mode": "stratum",
+      "algorithm": "kawpow",
+      "hashrate_sim_hs": 15000000.0,
+      "resource_share": 0.8,
+      "avg_latency_ms": 110,
+      "wallet_address": "RSYEUmpvdErLArh2SSqPfDPyfka1VpDrfc",
+      "stratum": {
+        "host": "rvn.2miners.com",
+        "port": 6060
+      }
+    },
+    "LTC": {
+      "mode": "stratum",
+      "algorithm": "scrypt",
+      "hashrate_sim_hs": 20000000.0,
+      "resource_share": 0.5,
+      "avg_latency_ms": 100,
+      "wallet_address": "M8359mbCa4iAX9eXkNtPWtF33Mm2M6c2Qq",
+      "stratum": {
+        "host": "ltc.2miners.com",
+        "port": 6060
+      }
+    },
+    "ERG": {
+      "mode": "stratum",
+      "algorithm": "autolykos",
+      "hashrate_sim_hs": 8000000.0,
+      "resource_share": 0.4,
+      "avg_latency_ms": 90,
+      "wallet_address": "0x5119bF3205dbA7b22E58A7e9FD934c342fDD8Ab3",
+      "stratum": {
+        "host": "erg.2miners.com",
+        "port": 8888
+      }
+    }
+  }
+}

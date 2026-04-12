@@ -1,0 +1,184 @@
+# ============================================================================
+# VirtualMiner / VHW
+# ASCII-ONLY SOURCE FILE
+# NOTE: This file intentionally avoids any non-ASCII characters.
+# Jarvis ADA v4.7 Hybrid compatible. Unified rule-block tokens A..G.
+# This module is part of the cleaned bundle generated for the user.
+# ============================================================================
+
+"""
+File: failsafe.py
+Purpose:
+  Difficulty-first pruning governor that always prunes the hardest networks
+  first and never disconnects easier networks before harder ones. It ensures
+  that no lane is deactivated without a prior state-vector snapshot that
+  is ascii_floatmap compatible and suitable for exact rehydration later.
+
+Public API:
+  FailsafeGovernor(...callbacks...) -> instance
+  .prune_until_stable(target_global_util, current_global_util, max_steps, allow_multi_network)
+    -> dict summary
+
+The governor is stateless aside from callbacks; snapshots are exported via a
+user-supplied sink to avoid direct filesystem access.
+"""
+from dataclasses import dataclass
+from __future__ import annotations
+from typing import Dict, Any, Optional
+import time
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import append_telemetry
+
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def float_to_ascii(v: float) -> str:
+    v = clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def ascii_from_vector(vec: List[float]) -> str:
+    return ''.join(float_to_ascii(x) for x in vec)
+
+def sha256(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+@dataclass
+class PruneCandidate:
+    network: str
+    lane_id: str
+    tier_id: int
+    effective_difficulty: float
+    uptime_s: float
+    health_score: float
+    reason: str
+
+@dataclass
+class SnapshotRecord:
+    lane_id: str
+    tier_id: int
+    network: str
+    timestamp: str
+    vector_ascii: str
+    hash: str
+
+class FailsafeGovernor:
+    """Strict difficulty-first pruning with snapshot guarantees."""
+    def __init__(
+        self,
+        read_lane_state: Callable[[str], Dict],
+        snapshot_lane_to_vector: Callable[[str], Dict],
+        deactivate_lane: Callable[[str], None],
+        list_active_lanes: Callable[[], List[Dict]],
+        network_difficulty: Callable[[str], float],
+        export_snapshot: Callable[[SnapshotRecord], None],
+        can_prune_network: Callable[[str], bool],
+        must_hold_lanes: Callable[[str], bool] = lambda n: False,
+    ):
+        self.read_lane_state = read_lane_state
+        self.snapshot_lane_to_vector = snapshot_lane_to_vector
+        self.deactivate_lane = deactivate_lane
+        self.list_active_lanes = list_active_lanes
+        self.network_difficulty = network_difficulty
+        self.export_snapshot = export_snapshot
+        self.can_prune_network = can_prune_network
+        self.must_hold_lanes = must_hold_lanes
+
+    def prune_until_stable(
+        self,
+        target_global_util: float,
+        current_global_util: float,
+        max_steps: int = 16,
+        allow_multi_network: bool = True
+    ) -> Dict:
+        summary = {
+            "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "current_util": current_global_util,
+            "target_util": target_global_util,
+            "steps": [],
+            "final_util_est": None
+        }
+        step = 0
+        while current_global_util > target_global_util and step < max_steps:
+            step += 1
+            ranked = self._rank_all_active_by_difficulty()
+            if not ranked:
+                break
+            plan = self._build_plan(ranked, allow_multi_network)
+            actions = []
+            for cand in plan:
+                act = self._snapshot_then_deactivate(cand)
+                if act:
+                    actions.append(act)
+                    current_global_util = max(0.0, current_global_util - 0.01)
+                if current_global_util <= target_global_util:
+                    break
+            summary["steps"].append({"iteration": step, "actions": actions})
+            if not actions:
+                break
+        summary["final_util_est"] = current_global_util
+        return summary
+
+    # Internals
+
+    def _rank_all_active_by_difficulty(self) -> List[PruneCandidate]:
+        ranked: List[PruneCandidate] = []
+        for lane in self.list_active_lanes():
+            net = lane.get("network")
+            if not self.can_prune_network(net):
+                continue
+            diff = float(self.network_difficulty(net))
+            st = self.read_lane_state(lane["lane_id"]) or {}
+            util = float(st.get("util_est", 0.0))
+            uptime = float(st.get("uptime_s", 0.0))
+            health = float(st.get("health_score", 1.0))
+            eff = diff * (1.0 + 0.5 * util) * (1.0 + 0.001 * lane.get("tier_id", 0))
+            ranked.append(PruneCandidate(
+                network=net,
+                lane_id=lane["lane_id"],
+                tier_id=int(lane.get("tier_id", 0)),
+                effective_difficulty=eff,
+                uptime_s=uptime,
+                health_score=health,
+                reason=st.get("reason", "balance")
+            ))
+        ranked.sort(key=lambda c: (-c.effective_difficulty, c.health_score))
+        return ranked
+
+    def _build_plan(self, ranked: List[PruneCandidate], allow_multi_network: bool) -> List[PruneCandidate]:
+        if not ranked:
+            return []
+        if not allow_multi_network:
+            hardest_network = ranked[0].network
+            return [c for c in ranked if c.network == hardest_network][:3]
+        return ranked[:5]
+
+    def _snapshot_then_deactivate(self, cand: PruneCandidate) -> Optional[Dict]:
+        if self.must_hold_lanes(cand.network):
+            return None
+        lane_sv = self.snapshot_lane_to_vector(cand.lane_id) or {}
+        vector_ascii = lane_sv.get("vector_ascii", "")
+        if any(ord(ch) < ASCII_MIN or ord(ch) > ASCII_MAX for ch in vector_ascii):
+            return None
+        snap_hash = lane_sv.get("hash") or sha256(vector_ascii)
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        rec = SnapshotRecord(
+            lane_id=cand.lane_id,
+            tier_id=cand.tier_id,
+            network=cand.network,
+            timestamp=stamp,
+            vector_ascii=vector_ascii,
+            hash=snap_hash
+        )
+        self.export_snapshot(rec)
+        self.deactivate_lane(cand.lane_id)
+        return {"lane_id": cand.lane_id, "network": cand.network, "tier_id": cand.tier_id, "snapshot_hash": snap_hash, "when": stamp}

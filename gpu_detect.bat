@@ -1,0 +1,1 @@
+echo GPU detection placeholder

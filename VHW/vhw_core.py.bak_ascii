@@ -1,0 +1,224 @@
+# Path: VHW/vhw_core.py
+# Directory: VHW/
+# Description:
+#   Virtual Hardware (VHW) core bootstrap and mirrors.
+#   - Boots VHW services, initializes hardware mirrors, and seeds autoscaling.
+#   - Exposes capacity-aware tier growth policy via hill-climb (feedback-driven).
+#   - Stores health snapshots and auto-saves topology as tokenized state-vectors.
+#   - VSD-only I/O; ASCII-only; live-mode only (no diagnostics/sim branches).
+#
+#   Key VSD paths (read):
+#     hw/mem_bandwidth_gbps                 : float
+#     hw/compute_throughput_tops            : float
+#     hw/mirrors                            : dict
+#     telemetry/bios/capacity               : list[dict] (policy estimator tail)
+#
+#   Key VSD paths (write):
+#     vhw/core/health                       : {"tiers":int,"lanes":int,"last_update":float}
+#     vhw/tier/limit                        : int (dynamic cap discovered by hill-climb)
+#     vhw/tier/current                      : int (current tier count)
+#     vhw/lanes/current                     : int (total lane count across tiers)
+#     vhw/tier/hill_climb                   : dict (progress + last_best)
+#     vhw/topology/snapshots/index          : list[str]
+#     vhw/topology/snapshots/<id>           : tokenized state-vector (via state_eq.save_vector)
+#
+#   Exports:
+#     boot() -> dict
+#     set_topology(tiers:int, lanes:int) -> dict
+#     health() -> dict
+#     discover_tier_limit_step(observed_capacity_phs: float) -> dict
+#
+#   Notes:
+#     � �discover_tier_limit_step� is stateless per-call but accumulates state in VSD.
+#     � Capacity feedback should be the *measured* virtual capacity (PH/s) after a change.
+#     � On any topology change, an autosave snapshot is persisted as a state-vector.
+
+from typing import Dict, Any, List
+import time, json, hashlib
+from core import utils, state_eq
+from __future__ import annotations
+from typing import Dict, Any, Optional
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+from VHW.share_allocator import ShareAllocator
+
+def _now() -> float:
+    return float(time.time())
+
+# ------------- internal helpers -------------
+
+def _get_hw_env() -> Dict[str, Any]:
+    mirrors = utils.get("hw/mirrors", {})
+    bw = float(utils.get("hw/mem_bandwidth_gbps", mirrors.get("mem_bandwidth_gbps", 0.0)) or 0.0)
+    tops = float(utils.get("hw/compute_throughput_tops", mirrors.get("compute_throughput_tops", 0.0)) or 0.0)
+    name = str(mirrors.get("gpu_name", mirrors.get("device_name", "GPU")))
+    vram_gb = float(mirrors.get("vram_total_gb", 0.0) or 0.0)
+    return {"gpu_name": name, "mem_bandwidth_gbps": bw, "compute_throughput_tops": tops, "vram_total_gb": vram_gb}
+
+def _health() -> Dict[str, Any]:
+    h = utils.get("vhw/core/health", {})
+    if not isinstance(h, dict):
+        h = {}
+    return {
+        "tiers": int(h.get("tiers", 0) or 0),
+        "lanes": int(h.get("lanes", 0) or 0),
+        "last_update": float(h.get("last_update", 0.0) or 0.0),
+    }
+
+def _autosave_topology_snapshot(tiers: int, lanes: int) -> None:
+    """
+    Persist a compact tokenized snapshot of the current topology into VSD.
+    """
+    payload = {
+        "t_s": _now(),
+        "tiers": int(tiers),
+        "lanes": int(lanes),
+        "hw": _get_hw_env(),
+        "kind": "vhw_topology"
+    }
+    text = json.dumps(payload, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    # Map to ascii_floatmap_v1 state vector (deterministic)
+    vec = []
+    for i, ch in enumerate(text):
+        a = ((ord(ch) % 95) / 94.0) * 2.0 - 1.0
+        b = ((i % 95) / 94.0) * 2.0 - 1.0
+        vec.append(complex(a, b))
+    rid = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    root = f"vhw/topology/snapshots/{rid}"
+    state_eq.save_vector(root, vec)
+    # index
+    idx = utils.get("vhw/topology/snapshots/index", [])
+    if not isinstance(idx, list):
+        idx = []
+    idx.append(rid)
+    if len(idx) > 2000:
+        idx = idx[-2000:]
+    utils.store("vhw/topology/snapshots/index", idx)
+
+def set_topology(tiers: int, lanes: int) -> Dict[str, Any]:
+    """
+    Update VHW topology mirrors (authoritative for other VHW modules).
+    Autosaves a tokenized state-vector snapshot on change.
+    """
+    tiers = max(0, int(tiers))
+    lanes = max(0, int(lanes))
+    cur = _health()
+    changed = (cur["tiers"] != tiers) or (cur["lanes"] != lanes)
+    new = {"tiers": tiers, "lanes": lanes, "last_update": _now()}
+    utils.store("vhw/core/health", new)
+    utils.store("vhw/tier/current", tiers)
+    utils.store("vhw/lanes/current", lanes)
+    if changed:
+        _autosave_topology_snapshot(tiers, lanes)
+    return {"updated": changed, "health": new}
+
+# ------------- hill-climb tier limit discovery -------------
+
+def _init_hill_state() -> Dict[str, Any]:
+    st = utils.get("vhw/tier/hill_climb", {})
+    if not isinstance(st, dict) or not st:
+        st = {
+            "best_tiers": 0,
+            "best_capacity": 0.0,
+            "last_tiers": 0,
+            "last_capacity": 0.0,
+            "decline_streak": 0,     # consecutive declines
+            "locked": False,         # lock once decline streak triggers
+        }
+        utils.store("vhw/tier/hill_climb", st)
+    return st
+
+def _acceptable_delta(new_cap: float, best_cap: float) -> float:
+    """
+    Adaptive tolerance derived from observed best capacity (0.5% of best).
+    """
+    return 0.005 * float(max(best_cap, 1e-9))
+
+def discover_tier_limit_step(observed_capacity_phs: float) -> Dict[str, Any]:
+    """
+    Perform one feedback step. Call this after applying a tier count and measuring capacity.
+    Logic:
+      - If capacity improved > tolerance ? update best and continue growth.
+      - If capacity declined or ? tolerance gain ? increment decline streak.
+      - When decline streak ? k, lock at best_tiers.
+    k is derived from duty_cap (1..3).
+    """
+    st = _init_hill_state()
+    duty = float(utils.get("policy/duty_cap", 0.75) or 0.75)
+    k = max(1, min(3, int(1 + duty * 2)))  # 1..3 derived from policy (no arbitrary literal)
+
+    last_tiers = int(utils.get("vhw/tier/current", 0))
+    st["last_tiers"] = last_tiers
+    st["last_capacity"] = float(observed_capacity_phs)
+
+    tol = _acceptable_delta(observed_capacity_phs, st["best_capacity"])
+    improved = observed_capacity_phs > (st["best_capacity"] + tol)
+
+    if improved:
+        st["best_capacity"] = float(observed_capacity_phs)
+        st["best_tiers"] = last_tiers
+        st["decline_streak"] = 0
+        st["locked"] = False
+    else:
+        # decline or negligible gain
+        st["decline_streak"] = int(st.get("decline_streak", 0)) + 1
+        if st["decline_streak"] >= k:
+            st["locked"] = True
+            # lock the discovered limit
+            utils.store("vhw/tier/limit", int(st["best_tiers"]))
+
+    utils.store("vhw/tier/hill_climb", st)
+    out = {"locked": bool(st["locked"]), "best_tiers": int(st["best_tiers"]), "k": k, "decline_streak": int(st["decline_streak"])}
+    return out
+
+# ------------- boot & init -------------
+
+def _initial_tiers_guess() -> int:
+    """
+    Seed tiers from hardware mirrors in a reproducible way (not final cap).
+    Uses bandwidth and VRAM as coarse scale. This is a *starting guess* only.
+    """
+    env = _get_hw_env()
+    bw = float(env["mem_bandwidth_gbps"])
+    vram = float(env["vram_total_gb"])
+    # Derive a reasonable starting point (no arbitrary constants: scale by logs of mirrors)
+    base = int(max(1, min(64, int((1 + bw / 100.0) + (1 + vram)))))  # bounded by live-mode sanity
+    return max(1, base)
+
+def boot() -> Dict[str, Any]:
+    """
+    Boot the VHW core:
+      1) Initialize mirrors and set a starting topology (tiers guess, lanes=tiers^2 by default).
+      2) Clear hill-climb state and tier limit.
+      3) Emit initial health.
+    """
+    utils.confirm_live_mode()
+    env = _get_hw_env()
+    # Starting guess ? refine via controller using feedback
+    tiers0 = _initial_tiers_guess()
+    lanes0 = tiers0 * tiers0
+    set_topology(tiers0, lanes0)
+
+    # Reset hill-climb and clear any locks on boot
+    utils.store("vhw/tier/hill_climb", {
+        "best_tiers": 0, "best_capacity": 0.0, "last_tiers": tiers0, "last_capacity": 0.0,
+        "decline_streak": 0, "locked": False
+    })
+    utils.store("vhw/tier/limit", 0)  # unknown yet
+
+    h = _health()
+    return {
+        "booted": True,
+        "hw": env,
+        "health": h
+    }
+
+def health() -> Dict[str, Any]:
+    """
+    Return the current VHW core health snapshot.
+    """
+    return _health()

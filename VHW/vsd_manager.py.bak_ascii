@@ -1,0 +1,171 @@
+# ============================================================================
+# Quantum Application / VHW
+# ASCII-ONLY SOURCE FILE
+# File: vsd_manager.py
+# Version: v4.8.3 (AI-Processor pack/rehydrate integration)
+# Jarvis ADA v4.8.3 Hybrid Ready
+# ============================================================================
+"""
+Purpose
+-------
+VSD Manager that stores and retrieves small JSON-like payloads under a key
+namespace. This manager is an in-memory stand-in designed for headless
+test and lab environments.
+
+Public API
+----------
+VSDManager()
+  .store(key: str, payload: dict|any) -> None
+  .get(key: str, default=None) -> dict|any
+  .delete(key: str) -> None
+  .list(prefix: str = "") -> list[str]
+  .snapshot_manifest() -> dict
+  .pack_snapshot(out_json: str, source_root: str = ".", memory_snapshot: str = "") -> dict
+  .rehydrate_full(state_json: str, out_dir: str, register_vs: bool = True) -> dict
+  .rehydrate_minimal(state_json: str, out_dir: str, rest_json: str = "") -> dict
+  .expand_rest(rest_json: str, out_dir: str, targets: list[str]) -> dict
+"""
+
+from __future__ import annotations
+from typing import Dict, Any, List, Optional
+import time
+import os
+import json
+import threading
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.AI_processor import Dehydrator, Rehydrator
+from core.utils import get, store, delete
+
+# ---------------------------------------------------------------------------
+# Optional AI-Processor (json_statevector_v2) integration
+# ---------------------------------------------------------------------------
+try:
+    from core.AI_processor import (
+        Dehydrator,
+        Rehydrator,
+        encode_bytes_to_ascii,
+        decode_ascii_to_bytes,
+    )
+    # expand_rest is a module-level helper in AI_processor; import if present
+    try:
+        from core.AI_processor import expand_rest as _expand_rest
+    except Exception:
+        _expand_rest = None  # type: ignore
+except Exception:
+    Dehydrator = None  # type: ignore
+    Rehydrator = None  # type: ignore
+    encode_bytes_to_ascii = None  # type: ignore
+    decode_ascii_to_bytes = None  # type: ignore
+    _expand_rest = None  # type: ignore
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return "".join(_float_to_ascii(x) for x in vec)
+
+def _sha256_text(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+class VSDManager:
+    def __init__(self):
+        self._kv: Dict[str, Any] = {}
+        self._t0 = time.time()
+
+    # -----------------------------------------------------------------------
+    # KV operations
+    # -----------------------------------------------------------------------
+    def store(self, key: str, payload: Any) -> None:
+        if not isinstance(key, str) or not key:
+            raise ValueError("key required")
+        self._kv[key] = payload
+
+    def get(self, key: str, default=None):
+        return self._kv.get(key, default)
+
+    def delete(self, key: str) -> None:
+        self._kv.pop(key, None)
+
+    def list(self, prefix: str = "") -> List[str]:
+        if not prefix:
+            return sorted(self._kv.keys())
+        return sorted([k for k in self._kv.keys() if k.startswith(prefix)])
+
+    # -----------------------------------------------------------------------
+    # Health / manifest
+    # -----------------------------------------------------------------------
+    def snapshot_manifest(self) -> Dict[str, Any]:
+        names = sorted(self._kv.keys())
+        vec = [
+            _clamp(len(names) / 1024.0, 0.0, 1.0) * 2.0 - 1.0,
+            _clamp((time.time() - self._t0) / 86400.0, 0.0, 1.0) * 2.0 - 1.0,
+            _clamp(sum(len(k) for k in names) / 65536.0, 0.0, 1.0) * 2.0 - 1.0,
+        ]
+        tok = _ascii_from_vector(vec)
+        return {
+            "header": {
+                "encoding": "ascii_floatmap_v1",
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "hash": _sha256_text(tok),
+            },
+            "vector_ascii": tok,
+            "keys": names[-32:],
+        }
+
+    # -----------------------------------------------------------------------
+    # AI-Processor helpers (optional; safe no-ops if AI_processor is missing)
+    # -----------------------------------------------------------------------
+    def pack_snapshot(self, out_json: str, source_root: str = ".", memory_snapshot: str = "") -> Dict[str, Any]:
+        """
+        Pack a full project snapshot to json_statevector_v2.
+        Writes to out_json. Returns the dehydrator result dict.
+        """
+        if Dehydrator is None:
+            raise RuntimeError("AI_processor not available for pack_snapshot")
+        # Ensure parent directory exists
+        os.makedirs(os.path.dirname(os.path.abspath(out_json)), exist_ok=True)
+        d = Dehydrator()
+        return d.pack(source_root, out_json, memory_snapshot)
+
+    def rehydrate_full(self, state_json: str, out_dir: str, register_vs: bool = True) -> Dict[str, Any]:
+        """
+        Rehydrate a full snapshot into out_dir.
+        """
+        if Rehydrator is None:
+            raise RuntimeError("AI_processor not available for rehydrate_full")
+        r = Rehydrator()
+        os.makedirs(out_dir, exist_ok=True)
+        return r.rehydrate_full(state_json, out_dir, register_vs=register_vs)
+
+    def rehydrate_minimal(self, state_json: str, out_dir: str, rest_json: str = "") -> Dict[str, Any]:
+        """
+        Rehydrate only core paths; emit the rest as a separate JSON container.
+        """
+        if Rehydrator is None:
+            raise RuntimeError("AI_processor not available for rehydrate_minimal")
+        r = Rehydrator()
+        os.makedirs(out_dir, exist_ok=True)
+        return r.rehydrate_minimal(state_json, out_dir, rest_json)
+
+    def expand_rest(self, rest_json: str, out_dir: str, targets: List[str]) -> Dict[str, Any]:
+        """
+        Expand individual files from a 'compressed rest' container.
+        """
+        if _expand_rest is None:
+            raise RuntimeError("AI_processor.expand_rest not available")
+        os.makedirs(out_dir, exist_ok=True)
+        return _expand_rest(rest_json, out_dir, targets)
+# End of file

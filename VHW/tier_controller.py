@@ -1,0 +1,198 @@
+
+"""
+vhw_tier_controller.py - Tier controller aligned with unified rule-blocks.
+- Decides tier targets and oscillation for balancing latency and bandwidth.
+- Exposes a minimal API used by allocators and qubit managers.
+"""
+
+from __future__ import annotations
+import math, time, json
+from typing import Dict, Any, List, Tuple, Optional
+import threading
+import time
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import get, store
+from VHW.vqram import VQRAM
+
+
+# Unified rule-block loader and helpers (tokens @A-@G)
+# This helper is duplicated across modules for isolation and direct replacement.
+from typing import Dict, Any, List, Optional
+
+ASCII_MIN = 32
+ASCII_MAX = 126
+
+def _clamp(v: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, v))
+
+def _now() -> float:
+    import time
+    return float(time.time())
+
+def _sha256(s: str) -> str:
+    import hashlib
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+def _float_to_ascii(v: float) -> str:
+    v = _clamp(v, -1.0, 1.0)
+    code = int((v + 1.0) * 47) + 32
+    code = _clamp(code, ASCII_MIN, ASCII_MAX)
+    return chr(int(code))
+
+def _ascii_from_vector(vec: List[float]) -> str:
+    return "".join(_float_to_ascii(x) for x in vec)
+
+def _fetch_rule_manifest() -> Dict[str, Any]:
+    """
+    Attempts to load the unified rule-block manifest from a canonical VSD path.
+    In this environment, the caller's ecosystem provides core.utils; if not
+    present, we return a sane default using the token table from the chat.
+    """
+    try:
+        from core import utils
+        m = utils.get("canonical/rule_blocks_unified", {})
+        if isinstance(m, dict) and m.get("token_table"):
+            return m
+    except Exception:
+        pass
+    # Fallback default (from user-provided JSON in chat)
+    return {
+        "token_table": {
+            "@A": [0.191489, -0.106383],
+            "@B": [0.468085,  0.191489],
+            "@C": [-0.085106, 0.106383],
+            "@D": [0.319149, -0.680851],
+            "@E": [0.106383,  0.276596],
+            "@F": [-0.148936, 0.468085],
+            "@G": [0.063830, -0.425532]
+        }
+    }
+
+class RuleParams:
+    """
+    Derives module-friendly coefficients from token pairs.
+    a,b pairs are mapped to:
+      anchor_a, anchor_b         (@A)
+      predict_a, predict_b       (@B)
+      stabil_a, stabil_b         (@C)
+      damp_a, damp_b             (@D)
+      bios_a, bios_b             (@E)
+      feedback_a, feedback_b     (@F)
+      harm_a, harm_b             (@G)
+    Provides convenience accessors for smoothing, damping, target util, etc.
+    """
+    def __init__(self, manifest: Optional[Dict[str, Any]] = None):
+        mf = manifest or _fetch_rule_manifest()
+        T = mf.get("token_table", {})
+        get = lambda k: T.get(k, [0.0, 0.0])
+        self.A = get("@A"); self.B = get("@B"); self.C = get("@C")
+        self.D = get("@D"); self.E = get("@E"); self.F = get("@F"); self.G = get("@G")
+
+    # smoothing alpha from stabilizer C
+    @property
+    def ema_alpha(self) -> float:
+        # map C to 0.05..0.35
+        return _clamp(0.20 + 0.15 * (self.C[1]), 0.05, 0.35)
+
+    # damping gain from D
+    @property
+    def damp_gain(self) -> float:
+        # map D to 0.2..0.8
+        return _clamp(0.5 + 0.3 * (self.D[0]), 0.2, 0.8)
+
+    # target util headroom from E
+    @property
+    def headroom(self) -> float:
+        # map E to 0.05..0.20
+        return _clamp(0.12 + 0.08 * (self.E[1] - 0.1), 0.05, 0.20)
+
+    # per-network capacity cap ratio (policy fixed to 0.20 but allow small offsets)
+    @property
+    def per_net_cap(self) -> float:
+        base = 0.20
+        jitter = 0.02 * (self.B[0] - self.B[1])
+        return _clamp(base + jitter, 0.15, 0.25)
+
+    # harmonics phase increment
+    @property
+    def phase_step(self) -> float:
+        return _clamp(0.010 + 0.010 * (self.G[0] + 0.2), 0.005, 0.025)
+
+    # coherence decay lambda
+    @property
+    def coherence_lambda(self) -> float:
+        return _clamp(0.0015 + 0.0035 * max(0.0, self.C[0] + 0.2), 0.001, 0.006)
+
+    # desirability attenuation vs difficulty
+    @property
+    def diff_attn(self) -> float:
+        return _clamp(1e-11 * (1.0 + 0.5 * self.D[1]), 1e-12, 5e-11)
+
+    # compute small harmonic bias
+    def harmonic_bias(self, phase: float) -> float:
+        import math
+        return 0.01 * math.sin(2.0 * math.pi * phase)
+
+
+class TierSpec:
+    def __init__(self, tier_id: int, vqram_mb: int = 256):
+        self.tier_id = int(tier_id)
+        self.vqram_mb = int(vqram_mb)
+        self.lane_count = 0
+        self.osc = 0.0
+        self.target_util = 0.65
+        self.latency_budget_ms = 5.0 + 0.5 * self.tier_id
+        self.bandweight = 1.0
+
+class TierController:
+    def __init__(self, tiers: int = 4):
+        self.rule = RuleParams()
+        self.tiers: Dict[int, TierSpec] = {}
+        for i in range(max(1, int(tiers))):
+            t = TierSpec(i, 256)
+            t.target_util = max(0.10, min(0.95, 0.75 - self.rule.headroom))
+            t.latency_budget_ms = max(2.0, min(25.0, 5.0 + 0.5 * i))
+            t.bandweight = 1.0
+            self.tiers[i] = t
+        self.phase = 0.0
+
+    def tick(self):
+        self.phase = (self.phase + self.rule.phase_step) % 1.0
+        for t in self.tiers.values():
+            base = 0.75 - self.rule.headroom
+            env = 0.04
+            t.osc = (t.osc + self.rule.phase_step * 0.8) % 1.0
+            t.target_util = max(0.10, min(0.95, base + env * math.sin(2.0 * math.pi * t.osc)))
+
+    def choose_for_expand(self) -> int:
+        # Score tiers by lane_count and oscillation phase; lower is better.
+        items = sorted(self.tiers.values(), key=lambda x: x.tier_id)
+        mean = math.sqrt(max(1.0, sum(t.lane_count for t in items)))
+        scored = []
+        for t in items:
+            score = (t.lane_count + 1) / (mean + 1.0) + 0.25 * t.osc + 0.10 / max(0.1, t.bandweight)
+            scored.append((score, t.tier_id))
+        scored.sort(key=lambda x: x[0])
+        return scored[0][1]
+
+    def mark_lane_delta(self, tier_id: int, delta: int):
+        if tier_id in self.tiers:
+            self.tiers[tier_id].lane_count = max(0, self.tiers[tier_id].lane_count + int(delta))
+
+    def snapshot(self) -> Dict[str, Any]:
+        vec = []
+        for tid in sorted(self.tiers.keys()):
+            t = self.tiers[tid]
+            vec.extend([
+                (tid % 64) / 32.0 - 1.0,
+                max(0.0, min(1.0, t.target_util)) * 2.0 - 1.0,
+                max(0.0, min(1.0, t.osc)) * 2.0 - 1.0
+            ])
+        tokenized = _ascii_from_vector(vec)
+        return {
+            "header": {"encoding": "ascii_floatmap_v1", "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())},
+            "vector_ascii": tokenized
+        }

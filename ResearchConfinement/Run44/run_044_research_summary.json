@@ -1,0 +1,117 @@
+{
+  "run_id": "run_044_substrate_microprocess_and_live_telemetry_resonance",
+  "generated_utc": "2026-04-09T05:09:54.0062161Z",
+  "purpose": [
+    "Test whether cross-file process artifacts can be encoded into substrate vector space and decoded back to the same outputs faster than the classical baseline.",
+    "Test whether startup telemetry can drive the same substrate path while accounting for noise, resonant nodes, and kernel actuation latency.",
+    "Test whether a real Vulkan compute dispatch can actuate the live telemetry capture path strongly enough to form an actuation-adjusted telemetry plane for the calculus."
+  ],
+  "runtime_entry_points": [
+    "VHW.gpu_pulse_runtime.benchmark_substrate_microprocess",
+    "VHW.gpu_pulse_runtime.benchmark_telemetry_resonance",
+    "VHW.gpu_pulse_runtime.run_substrate_telemetry_resonance",
+    "VHW.gpu_pulse_runtime.run_classical_telemetry_resonance",
+    "VHW.gpu_pulse_runtime._vulkan_calibration_actuation",
+    "VHW.system_utils.device_snapshot"
+  ],
+  "external_actuation_path": [
+    "ResearchConfinement/Calibrationkernals/vulkan_gpu_calibration_kernels/src/main.cpp"
+  ],
+  "scenarios": {
+    "substrate_microprocess": {
+      "sample_count": 256,
+      "pulse_cycles": 8,
+      "results_match": true,
+      "speedup_total": 1.6829795435216928,
+      "speedup_exec_only": 1.8485025376505608,
+      "route_case": "string_fold",
+      "result_tag": "6e472963-b461dde1-7958a892",
+      "trace_gate": 0.9803921568627451,
+      "trace_alignment": 0.8127607723125523,
+      "result_words": {
+        "dispatch_word": 1850157411,
+        "string_word": 3026312673,
+        "structure_word": 2035853458,
+        "result_word": 2742967312
+      }
+    },
+    "synthetic_telemetry": {
+      "telemetry_source": "synthetic",
+      "frame_count": 160,
+      "pulse_cycles": 5,
+      "results_match": true,
+      "trace_state_match": true,
+      "speedup_total": 3.500636302412586,
+      "speedup_exec_only": 5.290160073244487,
+      "route_case": "string_fold",
+      "result_tag": "ab7a72a7-8936c40b-625f5816",
+      "resonance_gate": 0.6515733471239816,
+      "noise_gate": 0.005869862170219911,
+      "latency_calibration": {
+        "predicted_latency_s": 0.015418717524415069,
+        "kernel_request_s": 0.00035666180317806337,
+        "pulse_generation_s": 0.00020955774669041008,
+        "kernel_actuation_s": 0.00012729725768519242,
+        "actuation_horizon_frames": 3.854679381103767,
+        "actuation_compensation": 0.5855153453099242,
+        "throughput_hz": 64.8562371297438
+      }
+    },
+    "live_telemetry": {
+      "telemetry_source": "live_startup",
+      "frame_count": 8,
+      "pulse_cycles": 3,
+      "results_match": true,
+      "trace_state_match": true,
+      "speedup_total": 2.90718339924873,
+      "speedup_exec_only": 5.486867172616259,
+      "route_case": "enum_switch",
+      "result_tag": "06d46fc9-9efbd8ab-6ce03820",
+      "resonance_gate": 0.6489265443156257,
+      "noise_gate": 1.5110028000017706e-05,
+      "actuation_summary": {
+        "applied": true,
+        "applied_count": 8,
+        "call_count": 8,
+        "mode": "vulkan_calibration",
+        "device_tag": "NVIDIA GeForce RTX 2060",
+        "avg_elapsed_s": 0.8912025249956059,
+        "dispatch_elapsed_ms_mean": 26.723499999999998,
+        "load_hint_mean": 0.26465699277
+      },
+      "latency_calibration": {
+        "predicted_latency_s": 0.008410595782358508,
+        "kernel_request_s": 0.00029794405155216344,
+        "pulse_generation_s": 0.00020267441978691957,
+        "kernel_actuation_s": 0.00012946998808972734,
+        "actuation_horizon_frames": 0.009909915449122989,
+        "actuation_compensation": 0.8081532883197177,
+        "throughput_hz": 118.89764124647766
+      },
+      "working_frame_plane": {
+        "raw_gpu_util_mean": 0.0,
+        "gpu_util_mean": 0.26465699277,
+        "raw_mem_bw_util_mean": 0.0,
+        "mem_bw_util_mean": 0.1535003058066
+      }
+    }
+  },
+  "supported_claims": [
+    "Substrate microprocessing reproduced the same mixed-artifact output as the classical baseline.",
+    "Synthetic startup telemetry reproduced both result and trace-state equality between substrate and classical paths.",
+    "A real Vulkan-backed live startup capture also reproduced both result and trace-state equality between substrate and classical paths after projecting the kernel actuation metadata into the working telemetry plane.",
+    "The bounded substrate path was faster than the classical comparison path in all three tested scenarios."
+  ],
+  "limitations": [
+    "The live telemetry source is aggregate device telemetry, not raw per-kernel counters.",
+    "The short-burst live run required actuation-adjusted telemetry because the coarse OS raw_gpu_util counter stayed at zero.",
+    "The measured speedups are runtime-path speedups and are not proof of native Vulkan or CUDA acceleration for the whole engine.",
+    "The live equivalence result applies to the same frozen live frame window, not to continuously changing live telemetry."
+  ],
+  "application_implications": [
+    "Engine routing, mixed text/structure/calculation preprocessing, and telemetry-aware control can be studied as substrate microprocess workloads.",
+    "Crypto mining can adopt the same pattern for job preprocessing, candidate ranking, and submission packet preparation while classical audit remains the external guard.",
+    "Kernel actuation scheduling can use resonant-node and latency forecasts before the actuation point instead of only reacting after the fact.",
+    "A future mining implementation can treat real pulse-kernel actuation as the source event and use the runtime only to decode and packetize the emergent result."
+  ]
+}

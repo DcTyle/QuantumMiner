@@ -1,0 +1,295 @@
+﻿# ============================================================================
+# VirtualMiner / Miner
+# File: submitter.py
+# ASCII-ONLY SOURCE FILE
+# Jarvis ADA v4.7 Hybrid Ready
+# ----------------------------------------------------------------------------
+# Purpose
+# -------
+# Live per-lane share submission with a lightweight thread pool, optional
+# client resolver, and VSD-backed counters. This preserves the older
+# flush-pending behavior as a fallback path but now favors immediate
+# per-lane submission.
+#
+# API
+# ---
+# class Submitter:
+#   Submitter(vsd=None, client_resolver=None, max_workers=8)
+#   .submit_share(lane_id: str, network: str, share: dict) -> None
+#   .flush_pending() -> dict  # retained as a fallback
+#   .stop(timeout: float = 2.0) -> None
+#
+# VSD Paths (aggregate)
+# ---------------------
+# /telemetry/metrics/<NET>/shares/aggregate -> {
+#   "submitted": int, "accepted": int, "found": int,
+#   "last_ts": float
+# }
+# /telemetry/metrics/<NET>/shares/_rate_snapshot -> {
+#   "submitted": int, "accepted": int, "found": int, "ts": float
+# }
+#
+# VSD Paths (per-lane)
+# --------------------
+# /telemetry/metrics/<NET>/shares/lanes/<LANE_ID> -> {
+#   "submitted": int, "accepted": int, "found": int, "last_ts": float
+# }
+#
+# Console Consumption
+# -------------------
+# Engine or submitter writes derived rates back into the network metrics
+# block stored at:
+#   /telemetry/metrics/<NET>/current
+# Fields updated:
+#   "hashes_submitted_hs", "hashes_found_hs", "accepted_hs" (optional)
+#
+# Notes
+# -----
+# - ASCII only, no Unicode.
+# - Client resolver should return an object with a .submit_share(network, share)
+#   or .submit(share) method. If missing, submissions are recorded as submitted
+#   but not accepted (no-op).
+# ============================================================================
+
+from __future__ import annotations
+from typing import Dict, Any, Optional
+import time
+
+# ---------------------------------------------------------------------------
+# Layered imports
+# ---------------------------------------------------------------------------
+from core.utils import append_telemetry
+
+
+class Submitter:
+    def __init__(
+        self,
+        vsd: Optional[Any] = None,
+        client_resolver: Optional[Callable[[str], Any]] = None,
+        max_workers: int = 8
+    ):
+        self.vsd = vsd
+        self.client_resolver = client_resolver
+        self.q = queue.Queue()
+        self._stop = False
+        self._workers = []
+        self._max_workers = max(1, int(max_workers))
+        for i in range(self._max_workers):
+            t = threading.Thread(target=self._worker, daemon=True, name="submitter_worker_%d" % i)
+            t.start()
+            self._workers.append(t)
+
+        # legacy buffer for flush_pending fallback
+        self._fallback = []
+
+    # -------------------------
+    # Public submission methods
+    # -------------------------
+
+    def submit_share(self, lane_id: str, network: str, share: Dict[str, Any]) -> None:
+        """
+        Live, per-lane submission. Enqueues a job for the thread pool.
+        Records lane-level and aggregate counters in VSD.
+        """
+        try:
+            lane_id = str(lane_id)
+            network = str(network).upper()
+        except Exception:
+            return
+        # update "found" counter immediately; acceptance depends on pool response
+        self._bump_found(network, lane_id)
+        # enqueue submission
+        try:
+            self.q.put_nowait(("submit", lane_id, network, dict(share or {})))
+        except Exception:
+            # fallback to legacy buffer, to be flushed by flush_pending
+            self._fallback.append(("submit", lane_id, network, dict(share or {})))
+
+    def flush_pending(self) -> Dict[str, Any]:
+        """
+        Retained for compatibility. Processes any legacy buffered shares.
+        Returns a small summary. Live flow should not need this.
+        """
+        processed = 0
+        acc = 0
+        while self._fallback:
+            op, lane_id, network, share = self._fallback.pop(0)
+            ok = self._do_submit(lane_id, network, share)
+            processed += 1
+            if ok:
+                acc += 1
+        return {"processed": processed, "accepted": acc}
+
+    def stop(self, timeout: float = 2.0) -> None:
+        self._stop = True
+        try:
+            for _ in self._workers:
+                self.q.put(("stop", "", "", {}))
+        except Exception:
+            pass
+        for t in self._workers:
+            try:
+                t.join(timeout=timeout)
+            except Exception:
+                pass
+        self._workers = []
+
+    # -------------------------
+    # Internal worker and calls
+    # -------------------------
+
+    def _worker(self) -> None:
+        while not self._stop:
+            try:
+                op, lane_id, network, share = self.q.get(timeout=0.5)
+            except queue.Empty:
+                continue
+            if op == "stop":
+                break
+            if op == "submit":
+                ok = self._do_submit(lane_id, network, share)
+                # counters bumped inside _do_submit
+            # no ack needed
+            self.q.task_done()
+
+    def _do_submit(self, lane_id: str, network: str, share: Dict[str, Any]) -> bool:
+        """
+        Perform the actual submission via client resolver. Update VSD counters
+        for submitted and accepted. Returns True on acceptance.
+        """
+        self._bump_submitted(network, lane_id)
+        client = None
+        if callable(self.client_resolver):
+            try:
+                client = self.client_resolver(network)
+            except Exception:
+                client = None
+
+        accepted = False
+        try:
+            if client is not None:
+                # prefer .submit_share(network, share), else .submit(share)
+                if hasattr(client, "submit_share"):
+                    accepted = bool(client.submit_share(network, share))
+                elif hasattr(client, "submit"):
+                    accepted = bool(client.submit(share))
+                else:
+                    accepted = False
+            else:
+                # no client available; treat as submitted but not accepted
+                accepted = False
+        except Exception:
+            accepted = False
+
+        if accepted:
+            self._bump_accepted(network, lane_id)
+
+        # after each submit, attempt to update rolling rates into network metrics
+        self._update_rates_into_metrics(network)
+
+        return accepted
+
+    # -------------------------
+    # VSD counter helpers
+    # -------------------------
+
+    def _now(self) -> float:
+        return float(time.time())
+
+    def _fetch(self, key: str, default: Any) -> Any:
+        if not self.vsd:
+            return default
+        try:
+            val = self.vsd.get(key, default)
+            return default if val is None else val
+        except Exception:
+            return default
+
+    def _store(self, key: str, value: Any) -> None:
+        if not self.vsd:
+            return
+        try:
+            self.vsd.store(key, value)
+        except Exception:
+            pass
+
+    def _bump_lane(self, network: str, lane_id: str, field: str) -> None:
+        key = "telemetry/metrics/%s/shares/lanes/%s" % (network, lane_id)
+        lane = dict(self._fetch(key, {}))
+        lane["submitted"] = int(lane.get("submitted", 0))
+        lane["accepted"] = int(lane.get("accepted", 0))
+        lane["found"] = int(lane.get("found", 0))
+        lane[field] = int(lane.get(field, 0)) + 1
+        lane["last_ts"] = self._now()
+        self._store(key, lane)
+
+    def _bump_agg(self, network: str, field: str) -> None:
+        key = "telemetry/metrics/%s/shares/aggregate" % network
+        agg = dict(self._fetch(key, {}))
+        agg["submitted"] = int(agg.get("submitted", 0))
+        agg["accepted"] = int(agg.get("accepted", 0))
+        agg["found"] = int(agg.get("found", 0))
+        agg[field] = int(agg.get(field, 0)) + 1
+        agg["last_ts"] = self._now()
+        self._store(key, agg)
+
+    def _bump_found(self, network: str, lane_id: str) -> None:
+        self._bump_lane(network, lane_id, "found")
+        self._bump_agg(network, "found")
+
+    def _bump_submitted(self, network: str, lane_id: str) -> None:
+        self._bump_lane(network, lane_id, "submitted")
+        self._bump_agg(network, "submitted")
+
+    def _bump_accepted(self, network: str, lane_id: str) -> None:
+        self._bump_lane(network, lane_id, "accepted")
+        self._bump_agg(network, "accepted")
+
+    # -------------------------
+    # Rate derivation into metrics
+    # -------------------------
+
+    def _update_rates_into_metrics(self, network: str) -> None:
+        """
+        Compute simple per-second rates from aggregate deltas and write them
+        into the network metrics block so the telemetry console can show:
+          - hashes_submitted_hs
+          - hashes_found_hs
+          - accepted_hs (optional)
+        """
+        agg_key = "telemetry/metrics/%s/shares/aggregate" % network
+        snap_key = "telemetry/metrics/%s/shares/_rate_snapshot" % network
+        cur = dict(self._fetch(agg_key, {}))
+        snap = dict(self._fetch(snap_key, {}))
+        now = self._now()
+        prev_ts = float(snap.get("ts", now))
+        dt = max(1e-6, now - prev_ts)
+
+        # count deltas
+        sub_cur = int(cur.get("submitted", 0))
+        acc_cur = int(cur.get("accepted", 0))
+        fnd_cur = int(cur.get("found", 0))
+
+        sub_prev = int(snap.get("submitted", 0))
+        acc_prev = int(snap.get("accepted", 0))
+        fnd_prev = int(snap.get("found", 0))
+
+        sub_rate = max(0.0, (sub_cur - sub_prev) / dt)
+        acc_rate = max(0.0, (acc_cur - acc_prev) / dt)
+        fnd_rate = max(0.0, (fnd_cur - fnd_prev) / dt)
+
+        # write back into network metrics block
+        metrics_key = "telemetry/metrics/%s/current" % network
+        metrics = dict(self._fetch(metrics_key, {}))
+        metrics["hashes_submitted_hs"] = float(sub_rate)
+        metrics["hashes_found_hs"] = float(fnd_rate)
+        metrics["accepted_hs"] = float(acc_rate)
+        self._store(metrics_key, metrics)
+
+        # update snapshot
+        self._store(snap_key, {
+            "submitted": sub_cur,
+            "accepted": acc_cur,
+            "found": fnd_cur,
+            "ts": now
+        })

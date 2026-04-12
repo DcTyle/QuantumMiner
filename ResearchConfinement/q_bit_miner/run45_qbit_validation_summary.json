@@ -1,0 +1,23 @@
+{
+  "feedback_packet_count": 8,
+  "frame_count": 8,
+  "max_closed_loop_latency_s": 1.4454289677535623,
+  "max_next_feedback_time_s": 0.013423458419907065,
+  "mean_axis_scale_x": 0.7275210563341591,
+  "mean_axis_scale_y": 0.5708859844853418,
+  "mean_axis_scale_z": 0.6173971473776592,
+  "mean_flux_transport_term": 0.36415498993566725,
+  "mean_inertial_mass_proxy": 0.609490394947726,
+  "mean_observer_damping": 0.5158095106353063,
+  "mean_phase_transport_term": 0.1787273236609161,
+  "mean_predictive_anchor_interference_norm": 0.0,
+  "mean_predictive_harmonic_noise_reaction_norm": 0.5691084735878488,
+  "mean_predictive_temporal_accuracy_score": 0.7592226559923896,
+  "mean_spin_momentum_score": 0.1809762088092472,
+  "mean_temporal_coupling_moment": 0.6620854553861477,
+  "mean_vector_energy": 0.34110594642773717,
+  "packet_count": 8,
+  "request_packet_count": 8,
+  "valid_identity_count": 8,
+  "valid_node_count": 8
+}

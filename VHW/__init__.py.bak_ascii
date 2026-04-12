@@ -1,0 +1,32 @@
+# ============================================================================
+# Virtual Hardware (VHW) Package Init
+# ASCII-ONLY SOURCE FILE
+# Jarvis ADA v4.8 Hybrid Compatible
+# ============================================================================
+"""
+Exposes monitor, live telemetry, lane and share allocators,
+and the virtual-state (VSD) management framework.
+All imports below are ASCII-safe and explicit.
+"""
+
+from __future__ import annotations
+
+# ---------------------------------------------------------------------------
+# Safe imports for VHW core
+# ---------------------------------------------------------------------------
+
+try:
+    from VHW.monitor import Monitor
+    from VHW.live import LiveTelemetry
+    from VHW.share_allocator import ShareAllocator
+    from VHW.vsd_manager import VSDManager
+except Exception as e:
+    # Soft-fail logging (pure ASCII)
+    print(f"[VHW.__init__] Warning: module import failed -> {e}")
+
+__all__ = [
+    "Monitor",
+    "LiveTelemetry",
+    "ShareAllocator",
+    "VSDManager",
+]

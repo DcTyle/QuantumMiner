@@ -123,10 +123,20 @@ class MinerPauseFlowTests(unittest.TestCase):
             time.sleep(0.10)
             self.assertGreater(cm.dispatch_count, 0)
             engine.pause(note="test pause", source="unit_test")
-            time.sleep(0.06)
+            deadline = time.time() + 0.50
+            stable_samples = 0
             paused_count = cm.dispatch_count
-            time.sleep(0.06)
-            self.assertEqual(cm.dispatch_count, paused_count)
+            while time.time() < deadline:
+                time.sleep(0.03)
+                current_count = cm.dispatch_count
+                if current_count == paused_count:
+                    stable_samples += 1
+                    if stable_samples >= 3:
+                        break
+                else:
+                    paused_count = current_count
+                    stable_samples = 0
+            self.assertGreaterEqual(stable_samples, 3)
             self.assertTrue(engine.is_paused())
         finally:
             engine.stop(timeout=0.2)

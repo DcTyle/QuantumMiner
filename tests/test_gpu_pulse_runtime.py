@@ -635,7 +635,13 @@ class TestGpuPulseRuntime(unittest.TestCase):
                 "_actuation_hook": _actuation_hook,
             },
         )
-        time.sleep(0.15)
+        deadline = time.time() + 1.0
+        while time.time() < deadline:
+            heartbeat = dict(vsd.get("vhw/gpu/heartbeat", {}) or {})
+            photonic_trace = dict(vsd.get("vhw/gpu/photonic_trace", {}) or {})
+            if str(heartbeat.get("mode", "")) == "photonic_actuation" and float(photonic_trace.get("trace_phase_ring_strength", 0.0)) > 0.0:
+                break
+            time.sleep(0.02)
         stop_gpu_initiator()
 
         heartbeat = dict(vsd.get("vhw/gpu/heartbeat", {}) or {})

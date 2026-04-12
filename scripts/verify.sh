@@ -44,31 +44,40 @@ else
   echo "[verify] ASCII-only check skipped (set STRICT_ASCII=1 to enforce)"
 fi
 
-# Core strict import/cycle guard focused on core subsystems
-python3 scripts/check_import_cycles.py --strict --focus bios,VHW,miner,core
+if [[ "${VERIFY_SKIP_GUARDS:-0}" == "1" ]]; then
+  echo "[verify] Guard checks skipped (VERIFY_SKIP_GUARDS=1)"
+else
+  # Core strict import/cycle guard focused on core subsystems
+  python3 scripts/check_import_cycles.py --strict --focus bios,VHW,miner,core
 
-# Boundary checks
-# Enforce strictly for prediction_engine -> miner and miner -> Neuralis_AI.
+  # Boundary checks
+  # Enforce strictly for prediction_engine -> miner and miner -> Neuralis_AI.
 
-# prediction_engine must not import miner directly (path-scoped)
-USAGE_MINER="$(python3 scripts/check_import_cycles.py --check-import miner || true)"
-PE_VIOLATIONS=$(printf "%s\n" "$USAGE_MINER" | sed -n "s/^  - \(prediction_engine\/.*\)$/\1/p" || true)
-if [[ -n "$PE_VIOLATIONS" ]]; then
-  echo "[verify] Boundary violation: prediction_engine -> miner" >&2
-  printf "%s\n" "$PE_VIOLATIONS" >&2
-  exit 1
+  # prediction_engine must not import miner directly (path-scoped)
+  USAGE_MINER="$(python3 scripts/check_import_cycles.py --check-import miner || true)"
+  PE_VIOLATIONS=$(printf "%s\n" "$USAGE_MINER" | sed -n "s/^  - \(prediction_engine\/.*\)$/\1/p" || true)
+  if [[ -n "$PE_VIOLATIONS" ]]; then
+    echo "[verify] Boundary violation: prediction_engine -> miner" >&2
+    printf "%s\n" "$PE_VIOLATIONS" >&2
+    exit 1
+  fi
+
+  # miner must not import Neuralis_AI (no allowlist)
+  USAGE_OUT="$(python3 scripts/check_import_cycles.py --check-import Neuralis_AI || true)"
+  VIOLATIONS=$(printf "%s\n" "$USAGE_OUT" | sed -n "s/^  - \(.*\)$/\1/p" | grep -E "^miner/" || true)
+  if [[ -n "$VIOLATIONS" ]]; then
+    echo "[verify] Boundary violation(s): miner -> Neuralis_AI" >&2
+    printf "%s\n" "$VIOLATIONS" >&2
+    exit 1
+  fi
 fi
 
-# miner must not import Neuralis_AI (no allowlist)
-USAGE_OUT="$(python3 scripts/check_import_cycles.py --check-import Neuralis_AI || true)"
-VIOLATIONS=$(printf "%s\n" "$USAGE_OUT" | sed -n "s/^  - \(.*\)$/\1/p" | grep -E "^miner/" || true)
-if [[ -n "$VIOLATIONS" ]]; then
-  echo "[verify] Boundary violation(s): miner -> Neuralis_AI" >&2
-  printf "%s\n" "$VIOLATIONS" >&2
-  exit 1
+if [[ "${VERIFY_SKIP_TESTS:-0}" == "1" ]]; then
+  echo "[verify] Unit tests skipped (VERIFY_SKIP_TESTS=1)"
+elif [[ -n "${VERIFY_TEST_MODULE:-}" ]]; then
+  python -m unittest -q "$VERIFY_TEST_MODULE"
+else
+  python -m unittest -q
 fi
-
-# Run unit tests quietly
-python -m unittest -q
 
 echo "[verify] All checks passed."

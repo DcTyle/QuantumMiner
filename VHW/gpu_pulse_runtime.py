@@ -36,6 +36,28 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return float(default)
 
 
+def _nested_values_match(left: Any, right: Any, rel_tol: float = 1e-9, abs_tol: float = 1e-9) -> bool:
+    if isinstance(left, bool) or isinstance(right, bool):
+        return left is right
+    if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+        return math.isclose(float(left), float(right), rel_tol=rel_tol, abs_tol=abs_tol)
+    if isinstance(left, dict) and isinstance(right, dict):
+        if set(left.keys()) != set(right.keys()):
+            return False
+        for key in left:
+            if not _nested_values_match(left[key], right[key], rel_tol=rel_tol, abs_tol=abs_tol):
+                return False
+        return True
+    if isinstance(left, (list, tuple)) and isinstance(right, (list, tuple)):
+        if len(left) != len(right):
+            return False
+        for left_item, right_item in zip(left, right):
+            if not _nested_values_match(left_item, right_item, rel_tol=rel_tol, abs_tol=abs_tol):
+                return False
+        return True
+    return left == right
+
+
 def _flag_enabled(value: Any, default: bool = False) -> bool:
     if value is None:
         return bool(default)
@@ -3387,7 +3409,10 @@ def benchmark_substrate_microprocess(
     classical_samples: list[int] = []
     substrate_result = run_substrate_microprocess(program_payload, previous_trace_state=previous_trace_state)
     classical_result = run_classical_microprocess(program_payload, previous_trace_state=previous_trace_state)
-    results_match = dict(substrate_result.get("result", {})) == dict(classical_result.get("result", {}))
+    results_match = _nested_values_match(
+        dict(substrate_result.get("result", {})),
+        dict(classical_result.get("result", {})),
+    )
 
     for _ in range(repeat_count):
         t0 = time.perf_counter_ns()
@@ -6343,7 +6368,10 @@ def benchmark_telemetry_resonance(
     classical_samples: list[int] = []
     substrate_result = run_substrate_telemetry_resonance(frozen_payload, previous_trace_state=previous_trace_state)
     classical_result = run_classical_telemetry_resonance(frozen_payload, previous_trace_state=previous_trace_state)
-    results_match = dict(substrate_result.get("result", {})) == dict(classical_result.get("result", {}))
+    results_match = _nested_values_match(
+        dict(substrate_result.get("result", {})),
+        dict(classical_result.get("result", {})),
+    )
 
     for _ in range(repeat_count):
         t0 = time.perf_counter_ns()

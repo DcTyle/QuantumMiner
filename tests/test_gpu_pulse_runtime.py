@@ -3,6 +3,20 @@ import unittest
 import time
 
 
+def _normalize_compare_value(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return round(float(value), 9)
+    if isinstance(value, dict):
+        return {key: _normalize_compare_value(val) for key, val in value.items()}
+    if isinstance(value, list):
+        return [_normalize_compare_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_normalize_compare_value(item) for item in value)
+    return value
+
+
 class _VSDStub:
     def __init__(self):
         self._kv = {"system/bios_boot_ok": True}
@@ -267,8 +281,8 @@ class TestGpuPulseRuntime(unittest.TestCase):
         self.assertTrue(out.get("ok"))
         self.assertTrue(out.get("results_match"))
         self.assertEqual(
-            dict(out.get("substrate_result", {}) or {}).get("result"),
-            dict(out.get("classical_result", {}) or {}).get("result"),
+            _normalize_compare_value(dict(out.get("substrate_result", {}) or {}).get("result")),
+            _normalize_compare_value(dict(out.get("classical_result", {}) or {}).get("result")),
         )
         result = dict(dict(out.get("substrate_result", {}) or {}).get("result", {}) or {})
         self.assertTrue(list(result.get("dominant_nodes", []) or []))

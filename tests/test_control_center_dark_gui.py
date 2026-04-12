@@ -29,6 +29,8 @@ class _DummyVSD:
 class ControlCenterDarkGuiTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        if os.environ.get("CI", "").strip().lower() == "true" and os.environ.get("RUN_GUI_TESTS", "") != "1":
+            raise unittest.SkipTest("GUI smoke test is skipped in headless CI")
         cls.app = QApplication.instance() or QApplication([])
         gui.apply_dark_palette(cls.app)
 
